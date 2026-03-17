@@ -1,0 +1,292 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:Intern-{MM}-{YY}-{####}",
+ "creation": "2025-05-23 13:42:07.315162",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "personal_details_section",
+  "full_name",
+  "phone_number",
+  "email",
+  "column_break_egsk",
+  "residential_area",
+  "county",
+  "gender",
+  "profile_photo",
+  "school_and_internship_details_section",
+  "course_",
+  "universitiescolleges",
+  "year_of_study",
+  "lecturers_name",
+  "lecturers_contact",
+  "column_break_ibkr",
+  "internship_type",
+  "internship_work_station",
+  "department",
+  "internship_duration_section",
+  "start_date",
+  "column_break_rkep",
+  "end_dte",
+  "documents_section",
+  "school_letter",
+  "insurance",
+  "school_certificates",
+  "column_break_clsl",
+  "copy_of_id",
+  "cv",
+  "human_resource_letter",
+  "skills_and_interests_tab",
+  "skills_and_achievements_section",
+  "skills_at_start_of_internship",
+  "column_break_hbqa",
+  "interest"
+ ],
+ "fields": [
+  {
+   "fieldname": "personal_details_section",
+   "fieldtype": "Section Break",
+   "label": "Personal Details"
+  },
+  {
+   "fieldname": "column_break_egsk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "residential_area",
+   "fieldtype": "Data",
+   "label": "Residential Area"
+  },
+  {
+   "default": "+254",
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "placeholder": "(+254)"
+  },
+  {
+   "fieldname": "school_and_internship_details_section",
+   "fieldtype": "Section Break",
+   "label": "School and Internship Details"
+  },
+  {
+   "fieldname": "year_of_study",
+   "fieldtype": "Select",
+   "label": "Year of study",
+   "options": "\nFirst\nSecond\nThird\nFourth"
+  },
+  {
+   "fieldname": "column_break_ibkr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "internship_type",
+   "fieldtype": "Select",
+   "label": "Internship Type",
+   "options": "\nIndustrial Attachment\nGraduate"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Documents"
+  },
+  {
+   "default": "0",
+   "fieldname": "school_letter",
+   "fieldtype": "Attach",
+   "label": "School Letter"
+  },
+  {
+   "default": "0",
+   "fieldname": "insurance",
+   "fieldtype": "Attach",
+   "label": "Insurance"
+  },
+  {
+   "default": "0",
+   "fieldname": "school_certificates",
+   "fieldtype": "Attach",
+   "label": "School Certificates"
+  },
+  {
+   "fieldname": "column_break_clsl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "copy_of_id",
+   "fieldtype": "Attach",
+   "label": "Copy of ID"
+  },
+  {
+   "default": "0",
+   "fieldname": "cv",
+   "fieldtype": "Attach",
+   "label": "CV"
+  },
+  {
+   "default": "0",
+   "fieldname": "human_resource_letter",
+   "fieldtype": "Attach",
+   "label": "Human Resource Letter"
+  },
+  {
+   "fieldname": "skills_and_achievements_section",
+   "fieldtype": "Section Break",
+   "label": "Skills and Achievements"
+  },
+  {
+   "fieldname": "skills_at_start_of_internship",
+   "fieldtype": "Long Text",
+   "label": "Skills at start of Internship"
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Long Text",
+   "label": "Interest"
+  },
+  {
+   "fetch_if_empty": 1,
+   "fieldname": "universitiescolleges",
+   "fieldtype": "Link",
+   "label": "Universities/Colleges",
+   "options": "Universities"
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name"
+  },
+  {
+   "fieldname": "course_",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Course",
+   "options": "Courses"
+  },
+  {
+   "fieldname": "internship_duration_section",
+   "fieldtype": "Section Break",
+   "label": "Internship Duration"
+  },
+  {
+   "fieldname": "column_break_rkep",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_dte",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Departments"
+  },
+  {
+   "fieldname": "profile_photo",
+   "fieldtype": "Attach Image",
+   "label": "Profile Photo"
+  },
+  {
+   "fieldname": "lecturers_name",
+   "fieldtype": "Data",
+   "label": "Lecturer's Name"
+  },
+  {
+   "fieldname": "lecturers_contact",
+   "fieldtype": "Data",
+   "label": "Lecturer's Contact",
+   "placeholder": "+254"
+  },
+  {
+   "fieldname": "skills_and_interests_tab",
+   "fieldtype": "Tab Break",
+   "label": "Skills and Interests"
+  },
+  {
+   "fieldname": "column_break_hbqa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "label": "County"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOther"
+  },
+  {
+   "fieldname": "internship_work_station",
+   "fieldtype": "Select",
+   "label": "Work Station",
+   "options": "\nHeadquarters\nIOMe 001\nIOMe 005\nMombasa\nKwale\nKilifi\nTana River\nLamu\nTaita-Taveta\nGarissa\nWajir\nMandera\nMarsabit\nIsiolo\nMeru\nTharaka-Nithi\nEmbu\nKitui\nMachakos\nMakueni\nNyandarua\nNyeri\nKirinyaga\nMurang\u2019a\nKiambu\nTurkana\nWest Pokot\nSamburu\nTrans Nzoia\nUasin Gishu\nElgeyo-Marakwet\nNandi\nBaringo\nLaikipia\nNakuru\nNarok\nKajiado\nKericho\nBomet\nKakamega\nVihiga\nBungoma\nBusia\nSiaya\nKisumu\nHoma Bay\nMigori\nKisii\nNyamira\nNairobi City"
+  }
+ ],
+ "grid_page_length": 50,
+ "image_field": "profile_photo",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-25 14:35:31.639489",
+ "modified_by": "ashlyneokumu@gmail.com",
+ "module": "Krcs Internship",
+ "name": "Intern",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internship Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Intern",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
