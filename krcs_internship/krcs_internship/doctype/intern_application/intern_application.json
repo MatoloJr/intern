@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-17 11:53:21.751181",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "posting",
+  "applicant_name",
+  "email",
+  "phone",
+  "university",
+  "course",
+  "year_of_study",
+  "cover_letter",
+  "cv",
+  "school_letter",
+  "status",
+  "date_applied",
+  "intern",
+  "notes",
+  "reference_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Posting",
+   "options": "Internship Posting",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applicant Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "university",
+   "fieldtype": "Link",
+   "label": "University",
+   "options": "Universities"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "label": "Course",
+   "options": "Courses"
+  },
+  {
+   "fieldname": "year_of_study",
+   "fieldtype": "Select",
+   "label": "Year of Study",
+   "options": "\nFirst\nSecond\nThird\nFourth\nGraduate"
+  },
+  {
+   "fieldname": "cover_letter",
+   "fieldtype": "Text",
+   "label": "Cover Letter"
+  },
+  {
+   "fieldname": "cv",
+   "fieldtype": "Attach",
+   "label": "CV"
+  },
+  {
+   "fieldname": "school_letter",
+   "fieldtype": "Attach",
+   "label": "School Letter"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nPending\nUnder Review\nShortlisted\nAccepted\nRejected"
+  },
+  {
+   "fieldname": "date_applied",
+   "fieldtype": "Date",
+   "label": "Date Applied"
+  },
+  {
+   "fieldname": "intern",
+   "fieldtype": "Link",
+   "label": "Intern",
+   "options": "Intern"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "reference_number",
+   "fieldtype": "Data",
+   "label": "Reference Number"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-17 12:10:24.972920",
+ "modified_by": "Administrator",
+ "module": "Krcs Internship",
+ "name": "Intern Application",
+ "owner": "matolojr@gmail.com",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

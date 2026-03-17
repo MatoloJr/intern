@@ -5,6 +5,9 @@ app_description = "Internship"
 app_email = "ashlyneokumu@gmail.com"
 app_license = "mit"
 
+# In krcs_internship/hooks.py — add this section
+after_migrate = ["krcs_internship.install.build_portal"]
+
 # Apps
 # ------------------
 
