@@ -1,25 +1,33 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "title.-.##.",
  "creation": "2026-03-17 11:35:07.329914",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "title",
   "department",
-  "location",
   "duration",
+  "column_break_mljw",
+  "location",
   "deadline",
-  "positions",
   "applications_count",
+  "column_break_tdsw",
+  "positions",
   "stipend_type",
   "stipend_amount",
-  "description",
-  "responsibilities",
+  "section_break_mkvj",
   "requirements",
   "skills",
+  "column_break_slbg",
+  "responsibilities",
+  "description",
+  "section_break_behp",
   "status",
+  "column_break_hxhx",
   "featured",
+  "column_break_rfwi",
   "posted_date"
  ],
  "fields": [
@@ -32,17 +40,17 @@
   },
   {
    "fieldname": "department",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Department",
-   "options": "Departments",
+   "options": "\nPROGRAM\nHR\nAUDIT & RISK\nPROCERUEMENT\nFINANCE\nGLOBAL FUND\nICHA\nNSD\nIT\nPR\nLEGAL\nTRAINING SCHOOL\nSECURITY\nCOMPLIANCE",
    "reqd": 1
   },
   {
    "fieldname": "location",
    "fieldtype": "Select",
    "label": "Location",
-   "options": "Nairobi\nMombasa\nKisumu\nEldoret\nNakuru\nRemote"
+   "options": "\nNairobi\nMombasa\nKisumu\nEldoret\nNakuru\nRemote"
   },
   {
    "fieldname": "duration",
@@ -114,15 +122,44 @@
    "fieldname": "posted_date",
    "fieldtype": "Date",
    "label": "Posted Date"
+  },
+  {
+   "fieldname": "column_break_mljw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_tdsw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_mkvj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_slbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_behp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hxhx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rfwi",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 12:10:35.092439",
+ "modified": "2026-03-28 10:20:54.047717",
  "modified_by": "Administrator",
  "module": "Krcs Internship",
  "name": "Internship Posting",
+ "naming_rule": "Expression",
  "owner": "matolojr@gmail.com",
  "permissions": [
   {
