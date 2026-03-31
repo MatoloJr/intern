@@ -11,7 +11,7 @@ export const useMessagesStore = defineStore('messages', () => {
 
   async function fetchMessages(email) {
     const res = await frappeCall(
-      'krcs_internship.krcs_internship.api.get_messages',
+      'krcs_internship.api.get_messages',
       { email }
     )
     messages.value = res.message || []
@@ -19,7 +19,7 @@ export const useMessagesStore = defineStore('messages', () => {
 
   async function markRead(name) {
     await frappeCall(
-      'krcs_internship.krcs_internship.api.mark_message_read',
+      'krcs_internship.api.mark_message_read',
       { name }
     )
     const msg = messages.value.find(m => m.name === name)
@@ -28,7 +28,7 @@ export const useMessagesStore = defineStore('messages', () => {
 
   async function adminSend(to_email, subject, body, application = null) {
     return frappeCall(
-      'krcs_internship.krcs_internship.api.admin_send_message',
+      'krcs_internship.api.admin_send_message',
       { to_email, subject, body, application }
     )
   }

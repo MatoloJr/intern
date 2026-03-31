@@ -12,7 +12,7 @@ export const usePostingsStore = defineStore('postings', () => {
     error.value = null
     try {
       const res = await frappeCall(
-        'krcs_internship.krcs_internship.api.get_postings',
+        'krcs_internship.api.get_postings',
         filters
       )
       postings.value = res.message || []
@@ -25,7 +25,7 @@ export const usePostingsStore = defineStore('postings', () => {
 
   async function fetchPosting(name) {
     const res = await frappeCall(
-      'krcs_internship.krcs_internship.api.get_posting',
+      'krcs_internship.api.get_posting',
       { name }
     )
     return res.message
@@ -33,7 +33,7 @@ export const usePostingsStore = defineStore('postings', () => {
 
   async function fetchDepartments() {
     const res = await frappeCall(
-      'krcs_internship.krcs_internship.api.get_departments'
+      'krcs_internship.api.get_departments'
     )
     return res.message || []
   }

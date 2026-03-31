@@ -52,7 +52,8 @@
 import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 
-const logo = '/assets/krcs_internship/images/krcs-logo.png'
+import logoUrl from '../assets/krcs-logo.png'
+const logo = logoUrl
 
 const sidebarOpen = ref(false)
 const user = window.frappe?.session?.user || 'Admin'

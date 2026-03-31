@@ -4,7 +4,6 @@
     <!-- Left branding panel -->
     <div class="login-left">
       <div class="login-left-bg">
-        <img :src="heroImage" alt="KRCS" class="hero-img" />
         <div class="hero-overlay"></div>
       </div>
       <div class="login-left-content">
@@ -134,7 +133,8 @@ import { useRouter, RouterLink } from 'vue-router'
 import { ArrowLeft, GraduationCap, ShieldCheck, Eye, EyeOff } from 'lucide-vue-next'
 
 const router = useRouter()
-const logo = '/assets/krcs_internship/images/krcs-logo.png'
+import logoUrl from '../assets/krcs-logo.png'
+const logo = logoUrl
 const heroImage = '/assets/krcs_internship/images/krcs-hero.jpg'
 
 const activeTab = ref('student')

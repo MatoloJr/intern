@@ -4,6 +4,7 @@
  "creation": "2026-03-17 12:01:45.576118",
  "doctype": "DocType",
  "engine": "InnoDB",
+ "istable": 1,
  "field_order": [
   "date",
   "actions",
@@ -13,16 +14,19 @@
   {
    "fieldname": "date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date"
   },
   {
    "fieldname": "actions",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Actions"
   },
   {
    "fieldname": "by",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "By",
    "options": "User"
   }

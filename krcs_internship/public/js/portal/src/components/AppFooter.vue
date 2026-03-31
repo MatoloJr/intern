@@ -36,7 +36,8 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 
-const logo = '/assets/krcs_internship/images/krcs-logo.png'
+import logoUrl from '../assets/krcs-logo.png'
+const logo = logoUrl
 const year = new Date().getFullYear()
 </script>
 

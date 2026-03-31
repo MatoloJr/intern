@@ -10,7 +10,9 @@
   "from_user",
   "to_email",
   "message_type",
-  "read"
+  "read",
+  "sent_date",
+  "application"
  ],
  "fields": [
   {
@@ -47,6 +49,17 @@
    "fieldname": "read",
    "fieldtype": "Check",
    "label": "Read"
+  },
+  {
+  "fieldname": "sent_date",
+  "fieldtype": "Datetime",
+  "label": "Sent Date"
+  },
+  {
+  "fieldname": "application",
+  "fieldtype": "Link",
+  "label": "Application",
+  "options": "Intern Application"
   }
  ],
  "grid_page_length": 50,

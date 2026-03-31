@@ -404,7 +404,7 @@ async function handleSubmit() {
   submitting.value = true
   submitError.value = ''
   try {
-    const res = await frappeCall('krcs_internship.krcs_internship.api.submit_application', {
+    const res = await frappeCall('krcs_internship.api.submit_application', {
       posting: 'WALK-IN',
       applicant_name: form.value.fullName,
       email: form.value.email,

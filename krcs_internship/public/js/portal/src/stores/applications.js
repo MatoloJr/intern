@@ -9,7 +9,7 @@ export const useApplicationsStore = defineStore('applications', () => {
 
   async function submitApplication(payload) {
     const res = await frappeCall(
-      'krcs_internship.krcs_internship.api.submit_application',
+      'krcs_internship.api.submit_application',
       payload
     )
     return res.message
@@ -19,7 +19,7 @@ export const useApplicationsStore = defineStore('applications', () => {
     loading.value = true
     try {
       const res = await frappeCall(
-        'krcs_internship.krcs_internship.api.get_application_status',
+        'krcs_internship.api.get_application_status',
         { email }
       )
       applications.value = res.message || []
@@ -33,7 +33,7 @@ export const useApplicationsStore = defineStore('applications', () => {
     loading.value = true
     try {
       const res = await frappeCall(
-        'krcs_internship.krcs_internship.api.admin_get_applications',
+        'krcs_internship.api.admin_get_applications',
         filters
       )
       applications.value = res.message || []
@@ -44,7 +44,7 @@ export const useApplicationsStore = defineStore('applications', () => {
 
   async function updateStatus(name, status, note = '') {
     const res = await frappeCall(
-      'krcs_internship.krcs_internship.api.update_application_status',
+      'krcs_internship.api.update_application_status',
       { name, status, note }
     )
     // Update locally so the UI reflects immediately without a re-fetch

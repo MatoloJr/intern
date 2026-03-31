@@ -6,7 +6,6 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-bg">
-        <img :src="heroImage" alt="KRCS Volunteers" class="hero-img" />
         <div class="hero-overlay"></div>
         <div class="hero-gradient"></div>
       </div>

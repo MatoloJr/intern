@@ -113,7 +113,8 @@ import { RouterLink } from 'vue-router'
 import { Bell, User, LogOut, Plus, FileText, Clock, CheckCircle2, XCircle, TrendingUp } from 'lucide-vue-next'
 import ApplicationForm from '../components/ApplicationForm.vue'
 
-const logo = '/assets/krcs_internship/images/krcs-logo.png'
+import logoUrl from '../assets/krcs-logo.png'
+const logo = logoUrl
 const showForm = ref(false)
 const studentName = ref('James')
 

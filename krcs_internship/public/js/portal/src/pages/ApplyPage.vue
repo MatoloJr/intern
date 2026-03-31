@@ -100,7 +100,7 @@ async function handleSubmit() {
   submitError.value = ''
   try {
     const res = await frappeCall(
-      'krcs_internship.krcs_internship.api.submit_application',
+      'krcs_internship.api.submit_application',
       { posting: route.params.id, ...form.value }
     )
     refNumber.value = res.message.name

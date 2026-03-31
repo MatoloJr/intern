@@ -34,7 +34,7 @@ const searched = ref(false)
 
 async function lookUp() {
   const res = await frappeCall(
-    'krcs_internship.krcs_internship.api.get_application_status',
+    'krcs_internship.api.get_application_status',
     { email: email.value }
   )
   applications.value = res.message || []

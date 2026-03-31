@@ -30,7 +30,8 @@
 <script setup>
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-const logo = '/assets/krcs_internship/images/krcs-logo.png'
+import logoUrl from '../assets/krcs-logo.png'
+const logo = logoUrl
 const mobileOpen = ref(false)
 </script>
 

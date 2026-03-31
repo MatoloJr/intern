@@ -19,7 +19,8 @@
   "date_applied",
   "intern",
   "notes",
-  "reference_number"
+  "reference_number",
+  "timeline"
  ],
  "fields": [
   {
@@ -83,8 +84,10 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
-   "options": "\nPending\nUnder Review\nShortlisted\nAccepted\nRejected"
+   "options": "\nPending\nUnder Review\nShortlisted\nAccepted\nRejected",
+   "default": "Pending"
   },
   {
    "fieldname": "date_applied",
@@ -106,6 +109,12 @@
    "fieldname": "reference_number",
    "fieldtype": "Data",
    "label": "Reference Number"
+  },
+  {
+  "fieldname": "timeline",
+  "fieldtype": "Table",
+  "label": "Timeline",
+  "options": "Application Timeline"
   }
  ],
  "grid_page_length": 50,
