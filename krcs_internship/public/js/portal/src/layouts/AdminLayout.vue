@@ -3,7 +3,7 @@
     <!-- Top bar -->
     <header class="admin-topbar">
       <div class="topbar-left">
-        <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">☰</button>
+        <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen" aria-label="Toggle menu">☰</button>
         <RouterLink to="/" class="topbar-brand">
           <img :src="logo" alt="KRCS" />
           <span>KRCS Admin</span>
@@ -49,27 +49,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { ref } from "vue"
+import { RouterLink, RouterView } from "vue-router"
+import logoUrl from "../assets/krcs-logo.png"
 
-import logoUrl from '../assets/krcs-logo.png'
 const logo = logoUrl
-
 const sidebarOpen = ref(false)
-const user = window.frappe?.session?.user || 'Admin'
+const user = window.frappe?.session?.user || "Admin"
 
 const navItems = [
-  { to: '/admin/dashboard',    icon: '📊', label: 'Dashboard' },
-  { to: '/admin/postings',     icon: '📋', label: 'Manage Postings' },
-  { to: '/admin/postings/new', icon: '➕', label: 'New Posting' },
-  { to: '/admin/applications', icon: '📁', label: 'Applications' },
-  { to: '/admin/messages',     icon: '✉️', label: 'Messages' },
-  { to: '/admin/reports',      icon: '📈', label: 'Reports' },
+  { to: "/admin/dashboard",    icon: "📊", label: "Dashboard" },
+  { to: "/admin/postings",     icon: "📋", label: "Manage Postings" },
+  { to: "/admin/postings/new", icon: "➕", label: "New Posting" },
+  { to: "/admin/applications", icon: "📁", label: "Applications" },
+  { to: "/admin/messages",     icon: "✉️", label: "Messages" },
+  { to: "/admin/reports",      icon: "📈", label: "Reports" },
 ]
 </script>
 
 <style scoped>
 .admin-wrap { display: flex; flex-direction: column; min-height: 100vh; }
+
 .admin-topbar {
   height: 60px;
   background: #fff;
@@ -81,28 +81,31 @@ const navItems = [
   position: sticky;
   top: 0;
   z-index: 100;
+  flex-shrink: 0;
 }
 .topbar-left { display: flex; align-items: center; gap: .75rem; }
 .sidebar-toggle {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #374151;
-  padding: .2rem;
+  background: none; border: none;
+  font-size: 1.2rem; cursor: pointer; color: #374151; padding: .2rem;
 }
 @media (min-width: 1024px) { .sidebar-toggle { display: none; } }
-.topbar-brand { display: flex; align-items: center; gap: .5rem; text-decoration: none; font-weight: 700; color: #111; font-size: .95rem; }
+.topbar-brand {
+  display: flex; align-items: center; gap: .5rem;
+  text-decoration: none; font-weight: 700; color: #111; font-size: .95rem;
+}
 .topbar-brand img { height: 32px; width: 32px; object-fit: contain; }
 .topbar-right { display: flex; align-items: center; gap: 1rem; }
 .admin-user { font-size: .82rem; color: #6b7280; }
 .btn-logout { font-size: .82rem; color: #cc0000; text-decoration: none; font-weight: 600; }
-.admin-body { display: flex; flex: 1; overflow: hidden; }
+
+.admin-body { display: flex; flex: 1; min-height: 0; }
+
 .admin-sidebar {
   width: 220px;
   background: #7a0000;
   padding: 1.25rem 0;
   flex-shrink: 0;
+  /* Mobile: slide-in overlay */
   position: fixed;
   top: 60px;
   bottom: 0;
@@ -110,58 +113,41 @@ const navItems = [
   z-index: 90;
   transform: translateX(-100%);
   transition: transform .25s;
+  overflow-y: auto;
 }
-.admin-sidebar {
-  width: 220px;
-  background: #7a0000;
-  padding: 1.25rem 0;
-  flex-shrink: 0;
-  position: fixed;
-  top: 60px;
-  bottom: 0;
-  left: 0;
-  z-index: 90;
-  transform: translateX(-100%);
-  transition: transform .25s;
-}
-.admin-sidebar.open {
-  transform: translateX(0);
-}
+.admin-sidebar.open { transform: translateX(0); }
+
 @media (min-width: 1024px) {
   .admin-sidebar {
     position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
     transform: translateX(0);
   }
 }
-@media (min-width: 1024px) {
-  .admin-sidebar { position: sticky; transform: translateX(0); }
-}
+
 .sidebar-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.3);
-  z-index: 89;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.3); z-index: 89;
 }
 @media (min-width: 1024px) { .sidebar-overlay { display: none; } }
+
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: .7rem;
+  display: flex; align-items: center; gap: .7rem;
   padding: .7rem 1.25rem;
   text-decoration: none;
   color: rgba(255,255,255,.75);
-  font-size: .875rem;
-  font-weight: 500;
+  font-size: .875rem; font-weight: 500;
   transition: background .15s, color .15s;
 }
 .nav-item:hover { background: rgba(255,255,255,.1); color: #fff; }
 .nav-item-active { background: rgba(255,255,255,.15); color: #fff; }
 .nav-icon { font-size: 1rem; }
+
 .admin-main {
   flex: 1;
   padding: 2rem 1.5rem;
   overflow-y: auto;
-  margin-left: 0;
+  min-width: 0;
 }
-@media (min-width: 1024px) { .admin-main { margin-left: 220px; } }
 </style>

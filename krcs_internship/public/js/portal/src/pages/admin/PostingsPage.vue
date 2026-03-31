@@ -7,13 +7,16 @@
 
     <div class="toolbar">
       <input v-model="search" placeholder="Search postings…" class="search-input" />
-      <select v-model="statusFilter">
+      <select v-model="statusFilter" @change="applyFilter">
         <option value="">All Statuses</option>
-        <option>Draft</option><option>Published</option><option>Closed</option>
+        <option>Draft</option>
+        <option>Published</option>
+        <option>Closed</option>
       </select>
     </div>
 
-    <div class="table-card">
+    <div v-if="store.loading" class="loading-msg">Loading…</div>
+    <div v-else class="table-card">
       <table>
         <thead>
           <tr>
@@ -38,7 +41,7 @@
                 <button
                   class="btn-action btn-action-toggle"
                   @click="toggleStatus(p)"
-                >{{ p.status === 'Published' ? 'Close' : 'Publish' }}</button>
+                >{{ p.status === "Published" ? "Close" : "Publish" }}</button>
                 <button class="btn-action btn-action-del" @click="confirmDelete(p)">Delete</button>
               </div>
             </td>
@@ -57,7 +60,9 @@
         <p>Are you sure you want to delete "<strong>{{ toDelete.title }}</strong>"? This cannot be undone.</p>
         <div class="modal-actions">
           <button @click="toDelete = null" class="btn-cancel">Cancel</button>
-          <button @click="doDelete" class="btn-del-confirm">Delete</button>
+          <button @click="doDelete" class="btn-del-confirm" :disabled="deleting">
+            {{ deleting ? "Deleting…" : "Delete" }}
+          </button>
         </div>
       </div>
     </div>
@@ -65,21 +70,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
-import { useAdminStore } from '../../stores/admin'
-import { usePostingsStore } from '../../stores/postings'
-import StatusBadge from '../../components/StatusBadge.vue'
-import { frappeCall } from '../../lib/frappe'
+import { ref, computed, onMounted } from "vue"
+import { RouterLink } from "vue-router"
+import { useAdminStore } from "../../stores/admin"
+import { usePostingsStore } from "../../stores/postings"
+import StatusBadge from "../../components/StatusBadge.vue"
 
 const admin = useAdminStore()
 const store = usePostingsStore()
-const search = ref('')
-const statusFilter = ref('')
+const search = ref("")
+const statusFilter = ref("")
 const toDelete = ref(null)
+const deleting = ref(false)
 
 const filtered = computed(() =>
-  store.postings.filter(p => {
+  store.postings.filter((p) => {
     const s = search.value.toLowerCase()
     return (
       (!s || p.title?.toLowerCase().includes(s)) &&
@@ -89,24 +94,39 @@ const filtered = computed(() =>
 )
 
 function formatDate(d) {
-  return d ? new Date(d).toLocaleDateString('en-KE') : '—'
+  return d ? new Date(d).toLocaleDateString("en-KE") : "—"
+}
+
+function applyFilter() {
+  // Refetch with the status filter — admin needs to see all statuses
+  store.fetchPostings({ status: statusFilter.value || "" })
 }
 
 async function toggleStatus(p) {
-  const newStatus = p.status === 'Published' ? 'Closed' : 'Published'
+  const newStatus = p.status === "Published" ? "Closed" : "Published"
   await admin.updatePosting(p.name, { status: newStatus })
   p.status = newStatus
 }
 
-function confirmDelete(p) { toDelete.value = p }
-
-async function doDelete() {
-  await admin.deletePosting(toDelete.value.name)
-  store.postings = store.postings.filter(p => p.name !== toDelete.value.name)
-  toDelete.value = null
+function confirmDelete(p) {
+  toDelete.value = p
 }
 
-onMounted(() => store.fetchPostings({ status: '' }))
+async function doDelete() {
+  deleting.value = true
+  try {
+    await admin.deletePosting(toDelete.value.name)
+    store.postings = store.postings.filter((p) => p.name !== toDelete.value.name)
+    toDelete.value = null
+  } finally {
+    deleting.value = false
+  }
+}
+
+onMounted(() => {
+  // Admin should see all postings regardless of status
+  store.fetchPostings({ status: "" })
+})
 </script>
 
 <style scoped>
@@ -117,6 +137,7 @@ onMounted(() => store.fetchPostings({ status: '' }))
 .search-input { flex: 1; min-width: 180px; padding: .5rem .75rem; border: 1px solid #d1d5db; border-radius: 7px; font-size: .875rem; outline: none; }
 .search-input:focus { border-color: #cc0000; }
 .toolbar select { padding: .5rem .75rem; border: 1px solid #d1d5db; border-radius: 7px; font-size: .875rem; outline: none; }
+.loading-msg { text-align: center; color: #6b7280; padding: 2rem; }
 .table-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: auto; }
 table { width: 100%; border-collapse: collapse; font-size: .875rem; }
 th { background: #f9fafb; padding: .75rem 1rem; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
@@ -138,4 +159,5 @@ tr:last-child td { border-bottom: none; }
 .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; }
 .btn-cancel { padding: .55rem 1.1rem; border: 1px solid #d1d5db; border-radius: 7px; background: #fff; cursor: pointer; font-size: .875rem; }
 .btn-del-confirm { padding: .55rem 1.1rem; background: #cc0000; color: #fff; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: .875rem; }
+.btn-del-confirm:disabled { opacity: .6; cursor: default; }
 </style>

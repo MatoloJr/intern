@@ -5,8 +5,14 @@ app_description = "Internship"
 app_email = "ashlyneokumu@gmail.com"
 app_license = "mit"
 
-# In krcs_internship/hooks.py — add this section
+# Build the Vue portal after every bench migrate
 after_migrate = ["krcs_internship.install.build_portal"]
+ 
+# Expose the /portal page through Frappe's web layer
+website_route_rules = [
+    {"from_route": "/portal/<path:p>", "to_route": "portal"},
+    {"from_route": "/portal", "to_route": "portal"},
+]
 
 # Apps
 # ------------------

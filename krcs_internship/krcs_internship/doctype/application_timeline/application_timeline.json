@@ -21,7 +21,7 @@
    "fieldname": "actions",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Actions"
+   "label": "Action"
   },
   {
    "fieldname": "by",

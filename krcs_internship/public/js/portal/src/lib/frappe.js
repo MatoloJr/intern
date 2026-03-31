@@ -10,44 +10,73 @@ export async function frappeCall(method, args = {}) {
         method,
         args,
         callback: resolve,
-        error: reject
+        error: (err) => reject(new Error(err?.message || "Frappe call failed"))
       })
     })
   }
 
-  // Fallback: plain fetch for guest usage
-  const params = new URLSearchParams({ cmd: method, ...args })
-  const res = await fetch('/api/method/' + method, {
-    method: 'POST',
+  // Fallback: plain fetch for guest/SPA usage
+  // Frappe expects cmd + flat key-value pairs via form-encoded body
+  const body = new URLSearchParams()
+  body.append("cmd", method)
+  for (const [k, v] of Object.entries(args)) {
+    if (v === null || v === undefined) continue
+    // Frappe accepts JSON strings for complex values
+    body.append(k, typeof v === "object" ? JSON.stringify(v) : String(v))
+  }
+
+  const res = await fetch(`/api/method/${method}`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'X-Frappe-CSRF-Token': getCsrfToken()
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-Frappe-CSRF-Token": getCsrfToken()
     },
-    body: params
+    body: body.toString()
   })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return res.json()
+
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`
+    try {
+      const data = await res.json()
+      msg = data?.exc_type || data?.message || msg
+    } catch (_) {}
+    throw new Error(msg)
+  }
+
+  const data = await res.json()
+
+  // Frappe returns exceptions as { exc: "...", exc_type: "..." }
+  if (data.exc_type) {
+    throw new Error(data.exception || data.exc_type || "Server error")
+  }
+
+  return data
 }
 
 function getCsrfToken() {
-  return window.frappe?.csrf_token ||
-    document.cookie.split('; ')
-      .find(r => r.startsWith('csrf_token='))
-      ?.split('=')[1] || ''
+  return (
+    window.frappe?.csrf_token ||
+    document.cookie
+      .split("; ")
+      .find((r) => r.startsWith("csrf_token="))
+      ?.split("=")[1] ||
+    ""
+  )
 }
 
 export async function uploadFile(file, doctype, docname, fieldname) {
   const formData = new FormData()
-  formData.append('file', file)
-  formData.append('doctype', doctype)
-  formData.append('docname', docname)
-  formData.append('fieldname', fieldname)
-  formData.append('is_private', '0')
+  formData.append("file", file)
+  formData.append("doctype", doctype)
+  formData.append("docname", docname)
+  formData.append("fieldname", fieldname)
+  formData.append("is_private", "0")
 
-  const res = await fetch('/api/method/upload_file', {
-    method: 'POST',
-    headers: { 'X-Frappe-CSRF-Token': getCsrfToken() },
+  const res = await fetch("/api/method/upload_file", {
+    method: "POST",
+    headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
     body: formData
   })
+  if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`)
   return res.json()
 }

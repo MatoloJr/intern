@@ -89,18 +89,23 @@ def submit_application(posting, applicant_name, email, phone,
     if frappe.db.exists("Intern Application", {"posting": posting, "email": email}):
         frappe.throw(_("You have already applied for this position."))
 
-    # Validate posting is still open
-    p = frappe.get_doc("Internship Posting", posting)
-    if p.status != "Published":
-        frappe.throw(_("This posting is no longer accepting applications."))
-    if p.deadline and p.deadline < today():
-        frappe.throw(_("The application deadline for this posting has passed."))
+    # Validate posting exists and is open (allow WALK-IN as a special case)
+    if posting != "WALK-IN":
+        if not frappe.db.exists("Internship Posting", posting):
+            frappe.throw(_("Posting not found."))
+        p = frappe.get_doc("Internship Posting", posting)
+        if p.status != "Published":
+            frappe.throw(_("This posting is no longer accepting applications."))
+        if p.deadline and p.deadline < today():
+            frappe.throw(_("The application deadline for this posting has passed."))
 
     doc = frappe.new_doc("Intern Application")
-    doc.posting = posting
+    doc.posting = posting if posting != "WALK-IN" else None
     doc.applicant_name = applicant_name
     doc.email = email
     doc.phone = phone
+    # university and course are Link fields — store the value as-is
+    # (frontend sends the name of the linked doc or free text)
     doc.university = university
     doc.course = course
     doc.year_of_study = year_of_study
@@ -109,21 +114,23 @@ def submit_application(posting, applicant_name, email, phone,
     doc.status = "Pending"
     doc.date_applied = today()
 
-    # Seed the timeline
+    # Seed the timeline — field name is 'actions' per Application Timeline doctype
     doc.append("timeline", {
         "date": today(),
-        "action": "Application submitted",
+        "actions": "Application submitted",
         "by": frappe.session.user
     })
 
     doc.insert(ignore_permissions=True)
 
     # Increment applications_count on the posting
-    frappe.db.set_value(
-        "Internship Posting", posting,
-        "applications_count",
-        (p.applications_count or 0) + 1
-    )
+    if posting != "WALK-IN":
+        frappe.db.set_value(
+            "Internship Posting", posting,
+            "applications_count",
+            (frappe.db.get_value("Internship Posting", posting, "applications_count") or 0) + 1
+        )
+
     frappe.db.commit()
 
     return {
@@ -142,20 +149,21 @@ def get_application_status(email):
                 "status", "date_applied", "modified"]
     )
     for app in apps:
-        posting_data = frappe.db.get_value(
-            "Internship Posting",
-            app["posting"],
-            ["title", "department", "location"],
-            as_dict=True
-        )
-        if posting_data:
-            app.update(posting_data)
+        if app.get("posting"):
+            posting_data = frappe.db.get_value(
+                "Internship Posting",
+                app["posting"],
+                ["title", "department", "location"],
+                as_dict=True
+            )
+            if posting_data:
+                app.update(posting_data)
 
-        # Attach timeline
+        # Attach timeline — field name is 'actions' per Application Timeline doctype
         app["timeline"] = frappe.get_all(
             "Application Timeline",
             filters={"parent": app["name"]},
-            fields=["date", "action", "by"],
+            fields=["date", "actions", "by"],
             order_by="date asc"
         )
     return apps
@@ -165,9 +173,13 @@ def get_application_status(email):
 
 @frappe.whitelist(allow_guest=True)
 def get_messages(email):
+    filters = {}
+    if email:
+        filters["to_email"] = email
+
     messages = frappe.get_all(
         "Intern Message",
-        filters={"to_email": email},
+        filters=filters,
         fields=["name", "subject", "body", "from_user",
                 "message_type", "read", "sent_date", "application"],
         order_by="sent_date desc"
@@ -269,19 +281,20 @@ def admin_get_applications(posting=None, status=None,
                 or s in (a.email or "").lower()]
 
     for app in apps:
-        posting_data = frappe.db.get_value(
-            "Internship Posting",
-            app["posting"],
-            ["title", "department"],
-            as_dict=True
-        )
-        if posting_data:
-            app.update(posting_data)
+        if app.get("posting"):
+            posting_data = frappe.db.get_value(
+                "Internship Posting",
+                app["posting"],
+                ["title", "department"],
+                as_dict=True
+            )
+            if posting_data:
+                app.update(posting_data)
 
         app["timeline"] = frappe.get_all(
             "Application Timeline",
             filters={"parent": app["name"]},
-            fields=["date", "action", "by"],
+            fields=["date", "actions", "by"],
             order_by="date asc"
         )
     return apps
@@ -294,10 +307,13 @@ def update_application_status(name, status, note=""):
     old_status = doc.status
     doc.status = status
 
+    action_text = f"Status changed to {status}"
+    if note:
+        action_text += f": {note}"
+
     doc.append("timeline", {
         "date": today(),
-        "action": f"Status changed to {status}"
-                  + (f": {note}" if note else ""),
+        "actions": action_text,
         "by": frappe.session.user
     })
 
@@ -401,13 +417,19 @@ def _send_status_message(app_doc, old_status, new_status):
     if not body:
         return
 
-    posting_title = frappe.db.get_value(
-        "Internship Posting", app_doc.posting, "title")
+    posting_title = "General Application"
+    if app_doc.posting:
+        posting_title = frappe.db.get_value(
+            "Internship Posting", app_doc.posting, "title") or posting_title
 
     msg = frappe.new_doc("Intern Message")
     msg.to_email = app_doc.email
     msg.subject = f"Application Update: {posting_title}"
-    msg.body = f"Dear {app_doc.applicant_name},<br><br>{body}<br><br>Reference: {app_doc.name}"
+    msg.body = (
+        f"Dear {app_doc.applicant_name},<br><br>"
+        f"{body}<br><br>"
+        f"Reference: {app_doc.name}"
+    )
     msg.message_type = "Notification"
     msg.from_user = frappe.session.user
     msg.sent_date = now()

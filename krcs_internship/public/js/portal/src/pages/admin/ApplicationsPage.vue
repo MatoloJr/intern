@@ -6,8 +6,11 @@
       <input v-model="search" placeholder="Search by name or email…" class="search-input" />
       <select v-model="statusFilter" @change="load">
         <option value="">All Statuses</option>
-        <option>Pending</option><option>Under Review</option>
-        <option>Shortlisted</option><option>Accepted</option><option>Rejected</option>
+        <option>Pending</option>
+        <option>Under Review</option>
+        <option>Shortlisted</option>
+        <option>Accepted</option>
+        <option>Rejected</option>
       </select>
       <button class="btn-export" @click="exportCsv">↓ Export CSV</button>
     </div>
@@ -42,14 +45,14 @@
               <td><input type="checkbox" :value="app.name" v-model="selected" /></td>
               <td class="td-name">{{ app.applicant_name }}</td>
               <td>{{ app.email }}</td>
-              <td>{{ app.title || app.posting }}</td>
-              <td>{{ app.university || '—' }}</td>
+              <td>{{ app.title || app.posting || "Walk-in" }}</td>
+              <td>{{ app.university || "—" }}</td>
               <td>{{ formatDate(app.date_applied) }}</td>
               <td><StatusBadge :status="app.status" /></td>
               <td>
                 <div class="action-row">
                   <button class="btn-action" @click="toggleExpand(app.name)">
-                    {{ expanded === app.name ? 'Collapse' : 'View' }}
+                    {{ expanded === app.name ? "Collapse" : "View" }}
                   </button>
                   <select
                     :value="app.status"
@@ -71,15 +74,16 @@
                 <div class="detail-panel">
                   <div class="detail-cols">
                     <div>
-                      <strong>Course:</strong> {{ app.course || '—' }}<br/>
-                      <strong>Year:</strong> {{ app.year_of_study || '—' }}<br/>
-                      <strong>Phone:</strong> {{ app.phone || '—' }}
+                      <strong>Course:</strong> {{ app.course || "—" }}<br />
+                      <strong>Year:</strong> {{ app.year_of_study || "—" }}<br />
+                      <strong>Phone:</strong> {{ app.phone || "—" }}
                     </div>
                     <div v-if="app.timeline?.length">
                       <strong>Timeline:</strong>
-                      <div v-for="t in app.timeline" :key="t.date + t.action" class="timeline-entry">
+                      <div v-for="t in app.timeline" :key="t.date + t.actions" class="timeline-entry">
                         <span class="tl-dot">●</span>
-                        <span>{{ t.action }}</span>
+                        <!-- 'actions' is the field name in Application Timeline doctype -->
+                        <span>{{ t.actions }}</span>
                         <span class="tl-date">{{ t.date }}</span>
                       </div>
                     </div>
@@ -112,7 +116,9 @@
         </div>
         <div class="modal-actions">
           <button @click="msgTarget = null" class="btn-cancel">Cancel</button>
-          <button @click="sendMsg" class="btn-send">Send</button>
+          <button @click="sendMsg" class="btn-send" :disabled="sending">
+            {{ sending ? "Sending…" : "Send" }}
+          </button>
         </div>
       </div>
     </div>
@@ -120,75 +126,98 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useApplicationsStore } from '../../stores/applications'
-import { useMessagesStore } from '../../stores/messages'
-import StatusBadge from '../../components/StatusBadge.vue'
+import { ref, computed, onMounted } from "vue"
+import { useApplicationsStore } from "../../stores/applications"
+import { useMessagesStore } from "../../stores/messages"
+import StatusBadge from "../../components/StatusBadge.vue"
 
 const store = useApplicationsStore()
 const messages = useMessagesStore()
-const search = ref('')
-const statusFilter = ref('')
+const search = ref("")
+const statusFilter = ref("")
 const selected = ref([])
 const expanded = ref(null)
 const msgTarget = ref(null)
-const msgForm = ref({ subject: '', body: '' })
+const msgForm = ref({ subject: "", body: "" })
+const sending = ref(false)
 
 const filtered = computed(() => {
   const s = search.value.toLowerCase()
-  return store.applications.filter(a =>
-    (!s || a.applicant_name?.toLowerCase().includes(s) || a.email?.toLowerCase().includes(s)) &&
-    (!statusFilter.value || a.status === statusFilter.value)
+  return store.applications.filter(
+    (a) =>
+      (!s || a.applicant_name?.toLowerCase().includes(s) || a.email?.toLowerCase().includes(s)) &&
+      (!statusFilter.value || a.status === statusFilter.value)
   )
 })
 
-const allSelected = computed(() =>
-  filtered.value.length > 0 && filtered.value.every(a => selected.value.includes(a.name))
+const allSelected = computed(
+  () =>
+    filtered.value.length > 0 &&
+    filtered.value.every((a) => selected.value.includes(a.name))
 )
 
 function toggleAll(e) {
-  selected.value = e.target.checked ? filtered.value.map(a => a.name) : []
+  selected.value = e.target.checked ? filtered.value.map((a) => a.name) : []
 }
 function toggleExpand(name) {
   expanded.value = expanded.value === name ? null : name
 }
-function formatDate(d) { return d ? new Date(d).toLocaleDateString('en-KE') : '—' }
+function formatDate(d) {
+  return d ? new Date(d).toLocaleDateString("en-KE") : "—"
+}
 
 async function updateStatus(app, status) {
   await store.updateStatus(app.name, status)
 }
 
 async function bulkUpdate(status) {
-  await Promise.all(selected.value.map(name => store.updateStatus(name, status)))
+  await Promise.all(selected.value.map((name) => store.updateStatus(name, status)))
   selected.value = []
 }
 
 function openMessage(app) {
   msgTarget.value = app
-  msgForm.value = { subject: 'Your Application Update', body: '' }
+  msgForm.value = { subject: "Your Application Update", body: "" }
 }
 
 async function sendMsg() {
-  await messages.adminSend(msgTarget.value.email, msgForm.value.subject, msgForm.value.body, msgTarget.value.name)
-  msgTarget.value = null
+  sending.value = true
+  try {
+    await messages.adminSend(
+      msgTarget.value.email,
+      msgForm.value.subject,
+      msgForm.value.body,
+      msgTarget.value.name
+    )
+    msgTarget.value = null
+  } finally {
+    sending.value = false
+  }
 }
 
 function exportCsv() {
   const rows = [
-    ['Name', 'Email', 'Posting', 'University', 'Course', 'Status', 'Date'],
-    ...store.applications.map(a => [
-      a.applicant_name, a.email, a.title || a.posting,
-      a.university, a.course, a.status, a.date_applied
-    ])
+    ["Name", "Email", "Posting", "University", "Course", "Status", "Date"],
+    ...store.applications.map((a) => [
+      a.applicant_name,
+      a.email,
+      a.title || a.posting || "Walk-in",
+      a.university,
+      a.course,
+      a.status,
+      a.date_applied,
+    ]),
   ]
-  const csv = rows.map(r => r.join(',')).join('\n')
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
-  a.download = 'applications.csv'
+  const csv = rows.map((r) => r.map((c) => `"${(c || "").toString().replace(/"/g, '""')}"`).join(",")).join("\n")
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }))
+  a.download = "applications.csv"
   a.click()
 }
 
-function load() { store.fetchAll({ status: statusFilter.value || undefined }) }
+function load() {
+  store.fetchAll({ status: statusFilter.value || undefined })
+}
 onMounted(load)
 </script>
 
@@ -231,4 +260,5 @@ td { padding: .65rem .85rem; border-bottom: 1px solid #f3f4f6; color: #374151; v
 .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1rem; }
 .btn-cancel { padding: .55rem 1rem; border: 1px solid #d1d5db; border-radius: 7px; background: #fff; cursor: pointer; font-size: .85rem; }
 .btn-send { padding: .55rem 1.1rem; background: #cc0000; color: #fff; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: .85rem; }
+.btn-send:disabled { opacity: .6; cursor: default; }
 </style>
