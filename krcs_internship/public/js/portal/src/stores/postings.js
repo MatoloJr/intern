@@ -11,11 +11,21 @@ export const usePostingsStore = defineStore("postings", () => {
     loading.value = true
     error.value = null
     try {
+      // Build params — only include status if explicitly set
+      // Empty string "" → no status filter (admin sees all)
+      // "Published" (default) → public view
       const params = {
-        status: filters.status !== undefined ? filters.status : "Published",
         limit: filters.limit || 50,
         offset: filters.offset || 0,
       }
+
+      // Only add status if it's defined in the filters arg
+      if ("status" in filters) {
+        params.status = filters.status  // may be "" (all) or "Published" etc.
+      } else {
+        params.status = "Published"     // default for public portal
+      }
+
       if (filters.department) params.department = filters.department
       if (filters.location) params.location = filters.location
       if (filters.duration) params.duration = filters.duration
@@ -23,6 +33,7 @@ export const usePostingsStore = defineStore("postings", () => {
       if (filters.search) params.search = filters.search
 
       const res = await frappeCall("krcs_internship.api.get_postings", params)
+      // Frappe returns data in res.message
       postings.value = res.message || []
     } catch (e) {
       error.value = e.message || "Failed to load postings"
@@ -42,5 +53,19 @@ export const usePostingsStore = defineStore("postings", () => {
     return res.message || []
   }
 
-  return { postings, loading, error, fetchPostings, fetchPosting, fetchDepartments }
+  async function fetchUniversities() {
+    const res = await frappeCall("krcs_internship.api.get_universities")
+    return res.message || []
+  }
+
+  async function fetchCourses() {
+    const res = await frappeCall("krcs_internship.api.get_courses")
+    return res.message || []
+  }
+
+  return {
+    postings, loading, error,
+    fetchPostings, fetchPosting, fetchDepartments,
+    fetchUniversities, fetchCourses
+  }
 })

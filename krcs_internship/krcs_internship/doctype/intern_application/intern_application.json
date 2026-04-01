@@ -29,7 +29,7 @@
    "in_list_view": 1,
    "label": "Posting",
    "options": "Internship Posting",
-   "reqd": 1
+   "reqd": 0
   },
   {
    "fieldname": "applicant_name",
@@ -111,16 +111,16 @@
    "label": "Reference Number"
   },
   {
-  "fieldname": "timeline",
-  "fieldtype": "Table",
-  "label": "Timeline",
-  "options": "Application Timeline"
+   "fieldname": "timeline",
+   "fieldtype": "Table",
+   "label": "Timeline",
+   "options": "Application Timeline"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 12:10:24.972920",
+ "modified": "2026-04-01 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Krcs Internship",
  "name": "Intern Application",
@@ -136,6 +136,18 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 0,
+   "print": 1,
+   "read": 1,
+   "report": 0,
+   "role": "Internship Admin",
+   "share": 0,
    "write": 1
   }
  ],

@@ -3,25 +3,29 @@
  * Works whether Frappe's JS is loaded (desk/portal) or via plain fetch (SPA).
  */
 export async function frappeCall(method, args = {}) {
-  // If Frappe desk JS is available, use it (handles CSRF automatically)
+  // Use Frappe desk JS when available (handles CSRF automatically)
   if (window.frappe?.call) {
     return new Promise((resolve, reject) => {
       window.frappe.call({
         method,
         args,
-        callback: resolve,
-        error: (err) => reject(new Error(err?.message || "Frappe call failed"))
+        callback: (r) => resolve(r),
+        error: (r) => {
+          const msg =
+            r?.message ||
+            r?.exc ||
+            (typeof r === "string" ? r : "Frappe call failed")
+          reject(new Error(msg))
+        }
       })
     })
   }
 
-  // Fallback: plain fetch for guest/SPA usage
-  // Frappe expects cmd + flat key-value pairs via form-encoded body
+  // Fallback: plain fetch for SPA / guest usage
   const body = new URLSearchParams()
   body.append("cmd", method)
   for (const [k, v] of Object.entries(args)) {
     if (v === null || v === undefined) continue
-    // Frappe accepts JSON strings for complex values
     body.append(k, typeof v === "object" ? JSON.stringify(v) : String(v))
   }
 
@@ -29,32 +33,39 @@ export async function frappeCall(method, args = {}) {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "X-Frappe-CSRF-Token": getCsrfToken()
+      "X-Frappe-CSRF-Token": _getCsrfToken()
     },
     body: body.toString()
   })
 
-  if (!res.ok) {
-    let msg = `HTTP ${res.status}`
-    try {
-      const data = await res.json()
-      msg = data?.exc_type || data?.message || msg
-    } catch (_) {}
-    throw new Error(msg)
+  // Parse response JSON even on error status (Frappe sends error detail in JSON)
+  let data
+  try {
+    data = await res.json()
+  } catch (_) {
+    throw new Error(`HTTP ${res.status}: non-JSON response from server`)
   }
 
-  const data = await res.json()
+  if (!res.ok) {
+    // Frappe puts the human-readable error in _server_messages or exc
+    const serverMsg = _extractFrappeError(data)
+    throw new Error(serverMsg || `HTTP ${res.status}`)
+  }
 
-  // Frappe returns exceptions as { exc: "...", exc_type: "..." }
-  if (data.exc_type) {
-    throw new Error(data.exception || data.exc_type || "Server error")
+  // Frappe encodes Python exceptions in data.exc / data.exc_type
+  if (data.exc) {
+    const serverMsg = _extractFrappeError(data)
+    throw new Error(serverMsg || "Server error")
   }
 
   return data
 }
 
-function getCsrfToken() {
+function _getCsrfToken() {
+  // Priority: window.__FRAPPE_SESSION__ (injected by portal.html) >
+  //           window.frappe.csrf_token > cookie
   return (
+    window.__FRAPPE_SESSION__?.csrf_token ||
     window.frappe?.csrf_token ||
     document.cookie
       .split("; ")
@@ -62,6 +73,30 @@ function getCsrfToken() {
       ?.split("=")[1] ||
     ""
   )
+}
+
+function _extractFrappeError(data) {
+  // _server_messages is a JSON-encoded list of message dicts
+  if (data._server_messages) {
+    try {
+      const msgs = JSON.parse(data._server_messages)
+      const first = msgs[0]
+      if (typeof first === "string") {
+        // May itself be JSON-encoded
+        try {
+          const inner = JSON.parse(first)
+          return inner.message || first
+        } catch (_) {
+          return first
+        }
+      }
+      return first?.message || String(first)
+    } catch (_) {}
+  }
+  if (data.exception) return data.exception
+  if (data.exc_type) return `${data.exc_type}: ${data.exc || ""}`
+  if (data.message) return data.message
+  return null
 }
 
 export async function uploadFile(file, doctype, docname, fieldname) {
@@ -74,7 +109,7 @@ export async function uploadFile(file, doctype, docname, fieldname) {
 
   const res = await fetch("/api/method/upload_file", {
     method: "POST",
-    headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
+    headers: { "X-Frappe-CSRF-Token": _getCsrfToken() },
     body: formData
   })
   if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`)

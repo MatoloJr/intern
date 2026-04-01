@@ -9,7 +9,12 @@ from frappe.utils import today, now
 def get_postings(status="Published", department=None,
                  location=None, duration=None, stipend_type=None,
                  search=None, limit=20, offset=0):
-    filters = {"status": status}
+    filters = {}
+
+    # Empty string means "no filter" (admin view); "Published" means public view
+    if status:
+        filters["status"] = status
+
     if department:
         filters["department"] = department
     if location:
@@ -32,12 +37,12 @@ def get_postings(status="Published", department=None,
     )
 
     if search:
-        search = search.lower()
+        s = search.lower()
         postings = [
             p for p in postings
-            if search in (p.title or "").lower()
-            or search in (p.department or "").lower()
-            or search in (p.location or "").lower()
+            if s in (p.title or "").lower()
+            or s in (p.department or "").lower()
+            or s in (p.location or "").lower()
         ]
 
     return postings
@@ -45,17 +50,18 @@ def get_postings(status="Published", department=None,
 
 @frappe.whitelist(allow_guest=True)
 def get_posting(name):
+    if not frappe.db.exists("Internship Posting", name):
+        frappe.throw(_("Posting not found"), frappe.DoesNotExistError)
+
     doc = frappe.get_doc("Internship Posting", name)
     if doc.status not in ("Published",):
         frappe.throw(_("Posting not found"), frappe.DoesNotExistError)
 
     data = doc.as_dict()
-    # Parse newline-separated text fields into lists for Vue
     data["responsibilities_list"] = _split_lines(doc.responsibilities)
     data["requirements_list"] = _split_lines(doc.requirements)
     data["skills_list"] = _split_lines(doc.skills)
 
-    # Fetch similar postings (same dept, excluding this one)
     data["similar"] = frappe.get_all(
         "Internship Posting",
         filters={
@@ -79,57 +85,106 @@ def get_departments():
     )
 
 
+@frappe.whitelist(allow_guest=True)
+def get_universities():
+    return frappe.get_all(
+        "Universities",
+        fields=["name", "name1 as university_name", "location", "type"]
+    )
+
+
+@frappe.whitelist(allow_guest=True)
+def get_courses():
+    return frappe.get_all(
+        "Courses",
+        fields=["name", "name_of_course", "abbreviation"]
+    )
+
+
 # ─── Public: Applications ──────────────────────────────────────────────────────
 
 @frappe.whitelist(allow_guest=True)
 def submit_application(posting, applicant_name, email, phone,
                         university, course, year_of_study,
                         cover_letter="", school_letter=""):
-    # Duplicate check
-    if frappe.db.exists("Intern Application", {"posting": posting, "email": email}):
-        frappe.throw(_("You have already applied for this position."))
+    if not applicant_name or not str(applicant_name).strip():
+        frappe.throw(_("Applicant name is required."))
+    if not email or not str(email).strip():
+        frappe.throw(_("Email is required."))
 
-    # Validate posting exists and is open (allow WALK-IN as a special case)
-    if posting != "WALK-IN":
+    applicant_name = str(applicant_name).strip()
+    email = str(email).strip()
+
+    # Determine if this is a walk-in (no real posting)
+    is_walk_in = not posting or str(posting).strip() in ("", "WALK-IN", "None", "null")
+    actual_posting = None
+
+    if not is_walk_in:
+        # Validate posting exists and is open
         if not frappe.db.exists("Internship Posting", posting):
             frappe.throw(_("Posting not found."))
         p = frappe.get_doc("Internship Posting", posting)
         if p.status != "Published":
             frappe.throw(_("This posting is no longer accepting applications."))
-        if p.deadline and p.deadline < today():
+        if p.deadline and str(p.deadline) < today():
             frappe.throw(_("The application deadline for this posting has passed."))
+        # Duplicate check
+        if frappe.db.exists("Intern Application", {"posting": posting, "email": email}):
+            frappe.throw(_("You have already applied for this position."))
+        actual_posting = posting
+    else:
+        # Walk-in duplicate check: same email same day
+        if frappe.db.exists("Intern Application",
+                            {"posting": ["is", "not set"],
+                             "email": email,
+                             "date_applied": today()}):
+            frappe.throw(_("You have already submitted a walk-in application today."))
 
     doc = frappe.new_doc("Intern Application")
-    doc.posting = posting if posting != "WALK-IN" else None
+
+    # posting is reqd=1 in the doctype JSON — we use ignore_mandatory via insert flags
+    # but we must set it to something; for walk-ins we'll make a dummy or set flags
+    if actual_posting:
+        doc.posting = actual_posting
+    # For walk-ins: leave posting unset and insert with ignore_mandatory
+
     doc.applicant_name = applicant_name
     doc.email = email
-    doc.phone = phone
-    # university and course are Link fields — store the value as-is
-    # (frontend sends the name of the linked doc or free text)
-    doc.university = university
-    doc.course = course
-    doc.year_of_study = year_of_study
-    doc.cover_letter = cover_letter
-    doc.school_letter = school_letter
+    doc.phone = phone or ""
+
+    # university / course are Link fields — resolve to linked record name or leave blank
+    doc.university = _resolve_link("Universities", university)
+    doc.course = _resolve_link("Courses", course)
+
+    doc.year_of_study = year_of_study or ""
+    doc.cover_letter = cover_letter or ""
+    doc.school_letter = school_letter or ""
     doc.status = "Pending"
     doc.date_applied = today()
 
-    # Seed the timeline — field name is 'actions' per Application Timeline doctype
+    # Store unresolvable free-text values in notes
+    notes_parts = []
+    if university and not doc.university:
+        notes_parts.append(f"University: {university}")
+    if course and not doc.course:
+        notes_parts.append(f"Course: {course}")
+    if notes_parts:
+        doc.notes = "\n".join(notes_parts)
+
     doc.append("timeline", {
         "date": today(),
         "actions": "Application submitted",
         "by": frappe.session.user
     })
 
-    doc.insert(ignore_permissions=True)
+    # ignore_mandatory handles the required posting field for walk-ins
+    doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
-    # Increment applications_count on the posting
-    if posting != "WALK-IN":
+    if actual_posting:
+        current = frappe.db.get_value(
+            "Internship Posting", actual_posting, "applications_count") or 0
         frappe.db.set_value(
-            "Internship Posting", posting,
-            "applications_count",
-            (frappe.db.get_value("Internship Posting", posting, "applications_count") or 0) + 1
-        )
+            "Internship Posting", actual_posting, "applications_count", current + 1)
 
     frappe.db.commit()
 
@@ -142,11 +197,14 @@ def submit_application(posting, applicant_name, email, phone,
 
 @frappe.whitelist(allow_guest=True)
 def get_application_status(email):
+    if not email:
+        return []
+
     apps = frappe.get_all(
         "Intern Application",
-        filters={"email": email},
+        filters={"email": str(email).strip()},
         fields=["name", "posting", "applicant_name",
-                "status", "date_applied", "modified"]
+                "status", "date_applied", "modified", "notes"]
     )
     for app in apps:
         if app.get("posting"):
@@ -158,8 +216,11 @@ def get_application_status(email):
             )
             if posting_data:
                 app.update(posting_data)
+        else:
+            app["title"] = "Walk-in Application"
+            app["department"] = ""
+            app["location"] = ""
 
-        # Attach timeline — field name is 'actions' per Application Timeline doctype
         app["timeline"] = frappe.get_all(
             "Application Timeline",
             filters={"parent": app["name"]},
@@ -177,14 +238,13 @@ def get_messages(email):
     if email:
         filters["to_email"] = email
 
-    messages = frappe.get_all(
+    return frappe.get_all(
         "Intern Message",
         filters=filters,
         fields=["name", "subject", "body", "from_user",
                 "message_type", "read", "sent_date", "application"],
         order_by="sent_date desc"
     )
-    return messages
 
 
 @frappe.whitelist(allow_guest=True)
@@ -237,7 +297,14 @@ def update_posting(name, **kwargs):
                "featured", "status"]
     for key in allowed:
         if key in kwargs:
-            setattr(doc, key, kwargs[key])
+            val = kwargs[key]
+            if key == "featured":
+                val = int(val) if val is not None else 0
+            elif key == "positions":
+                val = int(val) if val else 0
+            elif key == "stipend_amount":
+                val = float(val) if val else 0.0
+            setattr(doc, key, val)
     doc.save()
     frappe.db.commit()
     return doc.as_dict()
@@ -268,7 +335,7 @@ def admin_get_applications(posting=None, status=None,
         filters=filters,
         fields=["name", "posting", "applicant_name", "email",
                 "phone", "university", "course", "year_of_study",
-                "status", "date_applied", "cv"],
+                "status", "date_applied", "cv", "notes"],
         limit=int(limit),
         start=int(offset),
         order_by="date_applied desc"
@@ -290,6 +357,9 @@ def admin_get_applications(posting=None, status=None,
             )
             if posting_data:
                 app.update(posting_data)
+        else:
+            app["title"] = "Walk-in Application"
+            app["department"] = "—"
 
         app["timeline"] = frappe.get_all(
             "Application Timeline",
@@ -297,6 +367,15 @@ def admin_get_applications(posting=None, status=None,
             fields=["date", "actions", "by"],
             order_by="date asc"
         )
+
+        # Resolve display names for linked fields
+        if app.get("university"):
+            uni_name = frappe.db.get_value("Universities", app["university"], "name1")
+            app["university"] = uni_name or app["university"]
+        if app.get("course"):
+            course_name = frappe.db.get_value("Courses", app["course"], "name_of_course")
+            app["course"] = course_name or app["course"]
+
     return apps
 
 
@@ -318,10 +397,7 @@ def update_application_status(name, status, note=""):
     })
 
     doc.save()
-
-    # Send a message to the applicant
     _send_status_message(doc, old_status, status)
-
     frappe.db.commit()
     return {"message": "Status updated"}
 
@@ -369,27 +445,31 @@ def get_dashboard_stats():
 @frappe.whitelist()
 def get_applications_by_department():
     _require_admin()
-    depts = frappe.db.sql("""
-        SELECT ip.department, COUNT(ia.name) as count
+    # LEFT JOIN so walk-in apps (no posting) are included
+    return frappe.db.sql("""
+        SELECT
+            COALESCE(ip.department, 'Walk-in') AS department,
+            COUNT(ia.name) AS count
         FROM `tabIntern Application` ia
-        JOIN `tabInternship Posting` ip ON ia.posting = ip.name
-        GROUP BY ip.department
+        LEFT JOIN `tabInternship Posting` ip ON ia.posting = ip.name
+        GROUP BY COALESCE(ip.department, 'Walk-in')
         ORDER BY count DESC
     """, as_dict=True)
-    return depts
 
 
 @frappe.whitelist()
 def get_applications_by_university():
     _require_admin()
     return frappe.db.sql("""
-        SELECT university,
-               COUNT(*) as total,
-               SUM(CASE WHEN status = 'Accepted' THEN 1 ELSE 0 END) as accepted
-        FROM `tabIntern Application`
-        WHERE university IS NOT NULL AND university != ''
-        GROUP BY university
+        SELECT
+            COALESCE(u.name1, ia.university, 'Unknown') AS university,
+            COUNT(*) AS total,
+            SUM(CASE WHEN ia.status = 'Accepted' THEN 1 ELSE 0 END) AS accepted
+        FROM `tabIntern Application` ia
+        LEFT JOIN `tabUniversities` u ON ia.university = u.name
+        GROUP BY COALESCE(u.name1, ia.university, 'Unknown')
         ORDER BY total DESC
+        LIMIT 20
     """, as_dict=True)
 
 
@@ -403,15 +483,33 @@ def _require_admin():
 def _split_lines(text):
     if not text:
         return []
-    return [l.strip() for l in text.split("\n") if l.strip()]
+    return [line.strip() for line in text.split("\n") if line.strip()]
+
+
+def _resolve_link(doctype, value):
+    """Resolve a free-text value to a linked doctype record name."""
+    if not value or not str(value).strip():
+        return None
+    value = str(value).strip()
+    # Direct match by primary key (name)
+    if frappe.db.exists(doctype, value):
+        return value
+    # Match by display field
+    if doctype == "Universities":
+        match = frappe.db.get_value("Universities", {"name1": value}, "name")
+        return match or None
+    if doctype == "Courses":
+        match = frappe.db.get_value("Courses", {"name_of_course": value}, "name")
+        return match or None
+    return None
 
 
 def _send_status_message(app_doc, old_status, new_status):
     status_messages = {
         "Under Review": "Your application is now under review by our team.",
-        "Shortlisted": "Congratulations! You have been shortlisted.",
-        "Accepted": "Congratulations! Your application has been accepted.",
-        "Rejected": "Thank you for applying. Unfortunately your application was not successful."
+        "Shortlisted": "Congratulations! You have been shortlisted for the next stage.",
+        "Accepted": "Congratulations! Your application has been accepted. Our team will be in touch with next steps.",
+        "Rejected": "Thank you for applying to KRCS. Unfortunately your application was not successful this time."
     }
     body = status_messages.get(new_status)
     if not body:
@@ -428,7 +526,8 @@ def _send_status_message(app_doc, old_status, new_status):
     msg.body = (
         f"Dear {app_doc.applicant_name},<br><br>"
         f"{body}<br><br>"
-        f"Reference: {app_doc.name}"
+        f"Reference: <strong>{app_doc.name}</strong><br><br>"
+        f"Best regards,<br>KRCS Internship Team"
     )
     msg.message_type = "Notification"
     msg.from_user = frappe.session.user
