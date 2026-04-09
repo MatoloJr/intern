@@ -14,16 +14,23 @@
 {% block page_content %}
 <div id="app"></div>
 
-{# Shim must be inline here — before portal.js — so frappeCall picks up CSRF on first mount #}
+<script type="application/json" id="__frappe_session__">
+{
+	"user": {{ frappe.session.user | tojson }},
+	"csrf_token": {{ frappe.session.csrf_token | tojson }},
+	"is_guest": {{ "true" if frappe.session.user == "Guest" else "false" }}
+}
+</script>
+
 <script>
-	window.__FRAPPE_SESSION__ = {
-		user: "{{ frappe.session.user | e }}",
-		csrf_token: "{{ frappe.session.csrf_token | e }}",
-		is_guest: {{ 'true' if frappe.session.user == 'Guest' else 'false' }}
-	};
-	if (!window.frappe) { window.frappe = {}; }
-	window.frappe.csrf_token = window.__FRAPPE_SESSION__.csrf_token;
-	window.frappe.session = { user: window.__FRAPPE_SESSION__.user };
+	(function() {
+		var el = document.getElementById('__frappe_session__');
+		var session = el ? JSON.parse(el.textContent) : {};
+		window.__FRAPPE_SESSION__ = session;
+		if (!window.frappe) { window.frappe = {}; }
+		window.frappe.csrf_token = session.csrf_token;
+		window.frappe.session = { user: session.user };
+	})();
 </script>
 <script src="/assets/krcs_internship/js/portal/dist/portal.js"></script>
 {% endblock %}

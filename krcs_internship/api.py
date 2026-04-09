@@ -11,8 +11,6 @@ def get_postings(status="Published", department=None,
 				 search=None, limit=20, offset=0):
 	filters = {}
 
-	# status="" means no filter (admin all-postings view)
-	# status="Published" means public-facing view
 	if status and status != "":
 		filters["status"] = status
 
@@ -56,7 +54,6 @@ def get_posting(name):
 
 	doc = frappe.get_doc("Internship Posting", name)
 
-	# Allow guests to see Published only; authenticated users see all
 	if frappe.session.user == "Guest" and doc.status != "Published":
 		frappe.throw(_("Posting not found"), frappe.DoesNotExistError)
 
@@ -225,7 +222,6 @@ def get_application_status(email):
 
 @frappe.whitelist(allow_guest=True)
 def get_messages(email):
-	# Guard: Intern Message DocType may not exist yet
 	if not frappe.db.table_exists("tabIntern Message"):
 		return []
 
@@ -499,7 +495,6 @@ def _resolve_link(doctype, value):
 
 
 def _send_status_message(app_doc, old_status, new_status):
-	# Guard: skip silently if Intern Message DocType hasn't been created yet
 	if not frappe.db.table_exists("tabIntern Message"):
 		return
 

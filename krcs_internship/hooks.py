@@ -14,6 +14,11 @@ website_route_rules = [
 	{"from_route": "/portal", "to_route": "portal"},
 ]
 
+# Fixtures to export/import reference data with the app
+fixtures = [
+	{"dt": "Role", "filters": [["name", "in", ["Internship Admin", "Intern"]]]},
+]
+
 # Apps
 # ------------------
 
