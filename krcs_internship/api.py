@@ -32,7 +32,8 @@ def get_postings(status="Published", department=None,
 				"status", "posted_date"],
 		limit=int(limit),
 		start=int(offset),
-		order_by="featured desc, posted_date desc"
+		order_by="featured desc, posted_date desc",
+		ignore_permissions=True   # ← Guest has no DocType read role; bypass permission check
 	)
 
 	if search:
@@ -72,7 +73,8 @@ def get_posting(name):
 		fields=["name", "title", "department", "location",
 				"duration", "deadline", "stipend_type",
 				"stipend_amount", "positions", "applications_count"],
-		limit=3
+		limit=3,
+		ignore_permissions=True
 	)
 	return data
 
@@ -81,7 +83,8 @@ def get_posting(name):
 def get_departments():
 	return frappe.get_all(
 		"Departments",
-		fields=["name", "department", "supervisor"]
+		fields=["name", "department", "supervisor"],
+		ignore_permissions=True
 	)
 
 
@@ -89,7 +92,8 @@ def get_departments():
 def get_universities():
 	return frappe.get_all(
 		"Universities",
-		fields=["name", "name1 as university_name", "location", "type"]
+		fields=["name", "name1 as university_name", "location", "type"],
+		ignore_permissions=True
 	)
 
 
@@ -97,7 +101,8 @@ def get_universities():
 def get_courses():
 	return frappe.get_all(
 		"Courses",
-		fields=["name", "name_of_course", "abbreviation"]
+		fields=["name", "name_of_course", "abbreviation"],
+		ignore_permissions=True
 	)
 
 
@@ -126,14 +131,23 @@ def submit_application(posting, applicant_name, email, phone,
 			frappe.throw(_("This posting is no longer accepting applications."))
 		if p.deadline and str(p.deadline) < today():
 			frappe.throw(_("The application deadline for this posting has passed."))
-		if frappe.db.exists("Intern Application", {"posting": posting, "email": email}):
+		existing = frappe.get_all(
+			"Intern Application",
+			filters={"posting": posting, "email": email},
+			ignore_permissions=True,
+			limit=1
+		)
+		if existing:
 			frappe.throw(_("You have already applied for this position."))
 		actual_posting = posting
 	else:
-		if frappe.db.exists("Intern Application",
-							{"posting": ["is", "not set"],
-							 "email": email,
-							 "date_applied": today()}):
+		existing_walkin = frappe.get_all(
+			"Intern Application",
+			filters={"posting": ["is", "not set"], "email": email, "date_applied": today()},
+			ignore_permissions=True,
+			limit=1
+		)
+		if existing_walkin:
 			frappe.throw(_("You have already submitted a walk-in application today."))
 
 	doc = frappe.new_doc("Intern Application")
@@ -172,7 +186,10 @@ def submit_application(posting, applicant_name, email, phone,
 		current = frappe.db.get_value(
 			"Internship Posting", actual_posting, "applications_count") or 0
 		frappe.db.set_value(
-			"Internship Posting", actual_posting, "applications_count", current + 1)
+			"Internship Posting", actual_posting,
+			"applications_count", current + 1,
+			update_modified=False
+		)
 
 	frappe.db.commit()
 
@@ -192,7 +209,8 @@ def get_application_status(email):
 		"Intern Application",
 		filters={"email": str(email).strip()},
 		fields=["name", "posting", "applicant_name",
-				"status", "date_applied", "modified", "notes"]
+				"status", "date_applied", "modified", "notes"],
+		ignore_permissions=True
 	)
 	for app in apps:
 		if app.get("posting"):
@@ -213,7 +231,8 @@ def get_application_status(email):
 			"Application Timeline",
 			filters={"parent": app["name"]},
 			fields=["date", "actions", "by"],
-			order_by="date asc"
+			order_by="date asc",
+			ignore_permissions=True
 		)
 	return apps
 
@@ -234,7 +253,8 @@ def get_messages(email):
 		filters=filters,
 		fields=["name", "subject", "body", "from_user",
 				"message_type", "read", "sent_date", "application"],
-		order_by="sent_date desc"
+		order_by="sent_date desc",
+		ignore_permissions=True
 	)
 
 

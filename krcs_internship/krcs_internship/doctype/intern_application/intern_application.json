@@ -149,6 +149,16 @@
    "role": "Internship Admin",
    "share": 0,
    "write": 1
+  },
+  {
+   "create": 1,
+   "read": 0,
+   "role": "Guest"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "All"
   }
  ],
  "row_format": "Dynamic",

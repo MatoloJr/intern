@@ -16,7 +16,9 @@ website_route_rules = [
 
 # Fixtures to export/import reference data with the app
 fixtures = [
-	{"dt": "Role", "filters": [["name", "in", ["Internship Admin", "Intern"]]]},
+	{
+        "dt": "Role", 
+        "filters": [["name", "in", ["Internship Admin", "Intern"]]]},
 ]
 
 # Apps

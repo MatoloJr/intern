@@ -60,11 +60,24 @@
             </select>
           </div>
 
-          <div v-if="store.loading" class="loading-msg">Loading…</div>
+          <!-- API error state -->
+          <div v-if="store.error" class="error-msg">
+            <p>⚠️ Could not load internships: <strong>{{ store.error }}</strong></p>
+            <p style="font-size:.8rem;color:#6b7280;">
+              Make sure the Frappe server is running at
+              <code>intern.localhost:8006</code> and
+              <code>krcs_internship</code> is installed on the site.
+            </p>
+            <button class="btn-clear" @click="store.fetchPostings()">Retry</button>
+          </div>
+
+          <div v-else-if="store.loading" class="loading-msg">Loading internships…</div>
+
           <div v-else-if="!filtered.length" class="empty-msg">
             <p>No internships match your filters.</p>
             <button class="btn-clear" @click="clearFilters">Clear Filters</button>
           </div>
+
           <div v-else class="cards-grid">
             <InternshipCard v-for="p in sorted" :key="p.name" :posting="p" />
           </div>
@@ -146,59 +159,45 @@ watch(() => route.query, (q) => {
 .divider { width: 48px; height: 3px; background: #cc0000; margin-top: .5rem; border-radius: 2px; }
 .layout { display: flex; gap: 1.75rem; align-items: flex-start; }
 .filters {
-  width: 220px;
-  flex-shrink: 0;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.25rem;
-  position: sticky;
-  top: 80px;
+  width: 220px; flex-shrink: 0;
+  background: #fff; border: 1px solid #e5e7eb;
+  border-radius: 12px; padding: 1.25rem;
+  position: sticky; top: 80px;
 }
 .filter-group { margin-bottom: 1rem; }
 .filter-group label { display: block; font-size: .78rem; font-weight: 600; color: #374151; margin-bottom: .35rem; }
 .filter-group input,
 .filter-group select {
-  width: 100%;
-  padding: .45rem .6rem;
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-  font-size: .85rem;
-  color: #374151;
-  outline: none;
+  width: 100%; padding: .45rem .6rem;
+  border: 1px solid #d1d5db; border-radius: 7px;
+  font-size: .85rem; color: #374151; outline: none;
 }
 .filter-group input:focus, .filter-group select:focus { border-color: #cc0000; }
 .btn-clear {
-  width: 100%;
-  padding: .5rem;
-  background: none;
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-  font-size: .82rem;
-  color: #6b7280;
-  cursor: pointer;
-  transition: border-color .15s;
+  width: 100%; padding: .5rem;
+  background: none; border: 1px solid #d1d5db;
+  border-radius: 7px; font-size: .82rem;
+  color: #6b7280; cursor: pointer; transition: border-color .15s;
 }
 .btn-clear:hover { border-color: #cc0000; color: #cc0000; }
 .results { flex: 1; min-width: 0; }
 .results-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-  font-size: .85rem;
-  color: #6b7280;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.25rem; font-size: .85rem; color: #6b7280;
 }
 .results-bar select {
-  padding: .35rem .6rem;
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-  font-size: .82rem;
-  outline: none;
+  padding: .35rem .6rem; border: 1px solid #d1d5db;
+  border-radius: 7px; font-size: .82rem; outline: none;
 }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
 .loading-msg, .empty-msg { text-align: center; padding: 3rem; color: #6b7280; }
 .empty-msg p { margin-bottom: 1rem; }
+.error-msg {
+  background: #fff3cd; border: 1px solid #ffc107;
+  border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+  color: #856404;
+}
+.error-msg code { background: #f8f9fa; padding: .1rem .35rem; border-radius: 3px; font-size: .82rem; }
 @media (max-width: 640px) {
   .layout { flex-direction: column; }
   .filters { width: 100%; position: static; }
