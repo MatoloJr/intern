@@ -1,36 +1,31 @@
-{% extends "templates/web.html"%}
+{% extends "templates/web.html" %}
 {% block title %}KRCS Internship Portal{% endblock %}
+
 {% block head_include %}
 <link rel="icon" type="image/png" href="/assets/krcs_internship/js/portal/dist/krcs-logo.png" />
 <link rel="stylesheet" href="/assets/krcs_internship/js/portal/dist/portal.css" />
 <style>
-  /* Hide Frappe's default header/navbar on the portal page */
-  header.navbar, .web-sidebar, footer.web-footer { display: none !important; }
-  body { padding-top: 0 !important; }
-  #page-portal { padding: 0; }
+	header.navbar, .web-sidebar, footer.web-footer { display: none !important; }
+	body { padding-top: 0 !important; }
+	#page-portal { padding: 0; }
 </style>
 {% endblock %}
+
 {% block page_content %}
-<div id="app">
-</div>
+<div id="app"></div>
 
-{% endblock %}
-{% block script %}
+{# Shim must be inline here — before portal.js — so frappeCall picks up CSRF on first mount #}
 <script>
-  // Expose Frappe session info to the Vue SPA
-  window.__FRAPPE_SESSION__ = {
-    user: "{{ frappe.session.user | e }}",
-    csrf_token: "{{ frappe.session.csrf_token | e }}",
-    is_guest: false
-  };
-
-  // Initialise window.frappe shim so frappeCall() can pick up the CSRF token
-  // even when the full Frappe desk JS is not loaded
-  if (!window.frappe) {
-    window.frappe = {};
-  }
-  window.frappe.csrf_token = window.__FRAPPE_SESSION__.csrf_token;
-  window.frappe.session = { user: window.__FRAPPE_SESSION__.user };
+	window.__FRAPPE_SESSION__ = {
+		user: "{{ frappe.session.user | e }}",
+		csrf_token: "{{ frappe.session.csrf_token | e }}",
+		is_guest: {{ 'true' if frappe.session.user == 'Guest' else 'false' }}
+	};
+	if (!window.frappe) { window.frappe = {}; }
+	window.frappe.csrf_token = window.__FRAPPE_SESSION__.csrf_token;
+	window.frappe.session = { user: window.__FRAPPE_SESSION__.user };
 </script>
 <script src="/assets/krcs_internship/js/portal/dist/portal.js"></script>
 {% endblock %}
+
+{% block script %}{% endblock %}
