@@ -1,46 +1,25 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-05-26 10:25:23.544074",
+ "creation": "2026-04-12 14:16:30.621858",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "assets_section",
-  "physical",
-  "system",
-  "intern"
+  "section_break_ptb5"
  ],
  "fields": [
   {
-   "fieldname": "assets_section",
-   "fieldtype": "Section Break",
-   "label": "Assets"
-  },
-  {
-   "fieldname": "system",
-   "fieldtype": "Select",
-   "label": "Virtual Systems"
-  },
-  {
-   "fieldname": "physical",
-   "fieldtype": "Select",
-   "label": "Physical"
-  },
-  {
-   "fieldname": "intern",
-   "fieldtype": "Link",
-   "label": "Intern",
-   "options": "User Profile",
-   "read_only": 1
+   "fieldname": "section_break_ptb5",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-12 13:00:05.962365",
+ "modified": "2026-04-12 14:16:30.621858",
  "modified_by": "Administrator",
  "module": "Krcs Internship",
- "name": "Assets Access",
+ "name": "IVIAMS Timesheet",
  "owner": "Administrator",
  "permissions": [
   {
@@ -57,6 +36,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

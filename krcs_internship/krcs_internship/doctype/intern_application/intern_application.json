@@ -5,8 +5,16 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "posting",
   "applicant_name",
+  "programme_posting",
+  "programme_type",
+  "academic_level",
+  "interview_date",
+  "interview_outcome",
+  "assigned_supervisor",
+  "department",
+  "start_date",
+  "end_date",
   "email",
   "phone",
   "university",
@@ -16,6 +24,7 @@
   "cv",
   "school_letter",
   "status",
+  "rejection_reason",
   "date_applied",
   "intern",
   "notes",
@@ -24,47 +33,48 @@
  ],
  "fields": [
   {
-   "fieldname": "posting",
+   "fetch_from": "intern.full_name",
+   "fieldname": "applicant_name",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Posting",
-   "options": "Internship Posting",
-   "reqd": 0
-  },
-  {
-   "fieldname": "applicant_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Applicant Name",
+   "options": "User Profile",
    "reqd": 1
   },
   {
+   "fetch_from": "intern.email",
    "fieldname": "email",
-   "fieldtype": "Data",
-   "label": "Email"
+   "fieldtype": "Link",
+   "label": "Email",
+   "options": "User Profile"
   },
   {
+   "fetch_from": "intern.phone_number_1",
    "fieldname": "phone",
-   "fieldtype": "Data",
-   "label": "Phone"
+   "fieldtype": "Link",
+   "label": "Phone",
+   "options": "User Profile"
   },
   {
+   "fetch_from": "intern.institution_name",
    "fieldname": "university",
    "fieldtype": "Link",
    "label": "University",
-   "options": "Universities"
+   "options": "User Profile"
   },
   {
+   "fetch_from": "intern.course",
    "fieldname": "course",
    "fieldtype": "Link",
    "label": "Course",
-   "options": "Courses"
+   "options": "User Profile"
   },
   {
+   "fetch_from": "intern.year_of_study",
    "fieldname": "year_of_study",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Year of Study",
-   "options": "\nFirst\nSecond\nThird\nFourth\nGraduate"
+   "options": "User Profile"
   },
   {
    "fieldname": "cover_letter",
@@ -72,22 +82,26 @@
    "label": "Cover Letter"
   },
   {
+   "fetch_from": "intern.cv",
    "fieldname": "cv",
-   "fieldtype": "Attach",
-   "label": "CV"
+   "fieldtype": "Link",
+   "label": "CV",
+   "options": "User Profile"
   },
   {
+   "fetch_from": "intern.school_letter",
    "fieldname": "school_letter",
-   "fieldtype": "Attach",
-   "label": "School Letter"
+   "fieldtype": "Link",
+   "label": "School Letter",
+   "options": "User Profile"
   },
   {
+   "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nPending\nUnder Review\nShortlisted\nAccepted\nRejected",
-   "default": "Pending"
+   "options": "\nPending\nUnder Review\nShortlisted\nAccepted\nRejected"
   },
   {
    "fieldname": "date_applied",
@@ -98,7 +112,7 @@
    "fieldname": "intern",
    "fieldtype": "Link",
    "label": "Intern",
-   "options": "Intern"
+   "options": "User Profile"
   },
   {
    "fieldname": "notes",
@@ -115,12 +129,71 @@
    "fieldtype": "Table",
    "label": "Timeline",
    "options": "Application Timeline"
+  },
+  {
+   "fetch_from": "posting.programme_type",
+   "fieldname": "programme_type",
+   "fieldtype": "Link",
+   "label": "Programme Type",
+   "options": "Programme Posting"
+  },
+  {
+   "fetch_from": "intern.academic_level",
+   "fieldname": "academic_level",
+   "fieldtype": "Link",
+   "label": "Academic Level",
+   "options": "User Profile"
+  },
+  {
+   "fetch_from": "programme_type.title",
+   "fieldname": "programme_posting",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Programme Posting",
+   "options": "Programme Posting"
+  },
+  {
+   "fieldname": "interview_date",
+   "fieldtype": "Date",
+   "label": "Interview date"
+  },
+  {
+   "fieldname": "interview_outcome",
+   "fieldtype": "Data",
+   "label": "Interview Outcome"
+  },
+  {
+   "fieldname": "assigned_supervisor",
+   "fieldtype": "Link",
+   "label": "Assigned Supervisor",
+   "options": "Supervisor"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Departments"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Text",
+   "label": "Rejection Reason"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-01 00:00:00.000000",
+ "modified": "2026-04-12 13:35:48.382646",
  "modified_by": "Administrator",
  "module": "Krcs Internship",
  "name": "Intern Application",
@@ -140,19 +213,14 @@
   },
   {
    "create": 1,
-   "delete": 0,
    "email": 1,
-   "export": 0,
    "print": 1,
    "read": 1,
-   "report": 0,
    "role": "Internship Admin",
-   "share": 0,
    "write": 1
   },
   {
    "create": 1,
-   "read": 0,
    "role": "Guest"
   },
   {

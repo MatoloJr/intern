@@ -46,7 +46,7 @@
    "fieldname": "intern",
    "fieldtype": "Link",
    "label": "Intern",
-   "options": "Intern",
+   "options": "User Profile",
    "read_only": 1
   },
   {
@@ -78,11 +78,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-25 12:49:30.466868",
- "modified_by": "ashlyneokumu@gmail.com",
+ "modified": "2026-04-12 13:00:06.241193",
+ "modified_by": "Administrator",
  "module": "Krcs Internship",
  "name": "Intern Activities",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

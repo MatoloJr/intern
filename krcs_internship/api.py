@@ -3,7 +3,7 @@ from frappe import _
 from frappe.utils import today, now
 
 
-# ─── Public: Internship Postings ──────────────────────────────────────────────
+# ─── Public: Programme Postings ──────────────────────────────────────────────
 
 @frappe.whitelist(allow_guest=True)
 def get_postings(status="Published", department=None,
@@ -24,7 +24,7 @@ def get_postings(status="Published", department=None,
 		filters["stipend_type"] = stipend_type
 
 	postings = frappe.get_all(
-		"Internship Posting",
+		"Programme Posting",
 		filters=filters,
 		fields=["name", "title", "department", "location", "duration",
 				"deadline", "stipend_type", "stipend_amount", "description",
@@ -50,10 +50,10 @@ def get_postings(status="Published", department=None,
 
 @frappe.whitelist(allow_guest=True)
 def get_posting(name):
-	if not frappe.db.exists("Internship Posting", name):
+	if not frappe.db.exists("Programme Posting", name):
 		frappe.throw(_("Posting not found"), frappe.DoesNotExistError)
 
-	doc = frappe.get_doc("Internship Posting", name)
+	doc = frappe.get_doc("Programme Posting", name)
 
 	if frappe.session.user == "Guest" and doc.status != "Published":
 		frappe.throw(_("Posting not found"), frappe.DoesNotExistError)
@@ -64,7 +64,7 @@ def get_posting(name):
 	data["skills_list"] = _split_lines(doc.skills)
 
 	data["similar"] = frappe.get_all(
-		"Internship Posting",
+		"Programme Posting",
 		filters={
 			"department": doc.department,
 			"status": "Published",
@@ -124,9 +124,9 @@ def submit_application(posting, applicant_name, email, phone,
 	actual_posting = None
 
 	if not is_walk_in:
-		if not frappe.db.exists("Internship Posting", posting):
+		if not frappe.db.exists("Programme Posting", posting):
 			frappe.throw(_("Posting not found."))
-		p = frappe.get_doc("Internship Posting", posting)
+		p = frappe.get_doc("Programme Posting", posting)
 		if p.status != "Published":
 			frappe.throw(_("This posting is no longer accepting applications."))
 		if p.deadline and str(p.deadline) < today():
@@ -184,9 +184,9 @@ def submit_application(posting, applicant_name, email, phone,
 
 	if actual_posting:
 		current = frappe.db.get_value(
-			"Internship Posting", actual_posting, "applications_count") or 0
+			"Programme Posting", actual_posting, "applications_count") or 0
 		frappe.db.set_value(
-			"Internship Posting", actual_posting,
+			"Programme Posting", actual_posting,
 			"applications_count", current + 1,
 			update_modified=False
 		)
@@ -215,7 +215,7 @@ def get_application_status(email):
 	for app in apps:
 		if app.get("posting"):
 			posting_data = frappe.db.get_value(
-				"Internship Posting",
+				"Programme Posting",
 				app["posting"],
 				["title", "department", "location"],
 				as_dict=True
@@ -276,7 +276,7 @@ def create_posting(title, department, location, duration, deadline,
 					requirements="", skills="", featured=0,
 					status="Draft"):
 	_require_admin()
-	doc = frappe.new_doc("Internship Posting")
+	doc = frappe.new_doc("Programme Posting")
 	doc.update({
 		"title": title,
 		"department": department,
@@ -303,7 +303,7 @@ def create_posting(title, department, location, duration, deadline,
 @frappe.whitelist()
 def update_posting(name, **kwargs):
 	_require_admin()
-	doc = frappe.get_doc("Internship Posting", name)
+	doc = frappe.get_doc("Programme Posting", name)
 	allowed = ["title", "department", "location", "duration", "deadline",
 			   "positions", "stipend_type", "stipend_amount", "description",
 			   "responsibilities", "requirements", "skills",
@@ -326,7 +326,7 @@ def update_posting(name, **kwargs):
 @frappe.whitelist()
 def delete_posting(name):
 	_require_admin()
-	frappe.delete_doc("Internship Posting", name)
+	frappe.delete_doc("Programme Posting", name)
 	frappe.db.commit()
 	return {"message": "Deleted"}
 
@@ -363,7 +363,7 @@ def admin_get_applications(posting=None, status=None,
 	for app in apps:
 		if app.get("posting"):
 			posting_data = frappe.db.get_value(
-				"Internship Posting",
+				"Programme Posting",
 				app["posting"],
 				["title", "department"],
 				as_dict=True
@@ -441,7 +441,7 @@ def get_dashboard_stats():
 	_require_admin()
 	return {
 		"active_postings": frappe.db.count(
-			"Internship Posting", {"status": "Published"}),
+			"Programme Posting", {"status": "Published"}),
 		"total_applications": frappe.db.count("Intern Application"),
 		"pending_review": frappe.db.count(
 			"Intern Application",
@@ -464,7 +464,7 @@ def get_applications_by_department():
 			COALESCE(ip.department, 'Walk-in') AS department,
 			COUNT(ia.name) AS count
 		FROM `tabIntern Application` ia
-		LEFT JOIN `tabInternship Posting` ip ON ia.posting = ip.name
+		LEFT JOIN `tabProgramme Posting` ip ON ia.posting = ip.name
 		GROUP BY COALESCE(ip.department, 'Walk-in')
 		ORDER BY count DESC
 	""", as_dict=True)
@@ -489,7 +489,7 @@ def get_applications_by_university():
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _require_admin():
-	if not frappe.has_permission("Internship Posting", "write"):
+	if not frappe.has_permission("Programme Posting", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
@@ -531,7 +531,7 @@ def _send_status_message(app_doc, old_status, new_status):
 	posting_title = "General Application"
 	if app_doc.posting:
 		posting_title = frappe.db.get_value(
-			"Internship Posting", app_doc.posting, "title") or posting_title
+			"Programme Posting", app_doc.posting, "title") or posting_title
 
 	try:
 		msg = frappe.new_doc("Intern Message")

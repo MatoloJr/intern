@@ -1,8 +1,8 @@
-# Copyright (c) 2025, Ash_Ok and Contributors
+# Copyright (c) 2026, Ash_Ok and Contributors
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 
 # On IntegrationTestCase, the doctype test records and all
@@ -12,18 +12,10 @@ EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
-class UnitTestIntern(UnitTestCase):
-	"""
-	Unit tests for Intern.
-	Use this class for testing individual functions and methods.
-	"""
 
-	pass
-
-
-class IntegrationTestIntern(IntegrationTestCase):
+class IntegrationTestPerformanceEvaluation(IntegrationTestCase):
 	"""
-	Integration tests for Intern.
+	Integration tests for PerformanceEvaluation.
 	Use this class for testing interactions between multiple components.
 	"""
 

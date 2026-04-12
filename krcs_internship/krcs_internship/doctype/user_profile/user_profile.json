@@ -8,27 +8,39 @@
  "field_order": [
   "personal_details_section",
   "full_name",
-  "phone_number",
+  "nationality",
+  "phone_number_1",
   "email",
   "column_break_egsk",
-  "residential_area",
   "county",
   "gender",
+  "residential_area",
   "profile_photo",
-  "school_and_internship_details_section",
-  "course_",
-  "universitiescolleges",
-  "year_of_study",
-  "lecturers_name",
-  "lecturers_contact",
-  "column_break_ibkr",
-  "internship_type",
-  "internship_work_station",
-  "department",
+  "emergency_contact_section",
+  "name1",
+  "occupation",
+  "column_break_xjqq",
+  "phone_number_2",
+  "relationship_type",
+  "skills_and_interests_section",
+  "specify_your_skill_set",
+  "column_break_veoq",
+  "outline_your_interests",
   "internship_duration_section",
   "start_date",
   "column_break_rkep",
   "end_dte",
+  "school_and_internship_details_section",
+  "academic_level",
+  "course",
+  "institution_name",
+  "year_of_study",
+  "column_break_ibkr",
+  "internship_type",
+  "internship_work_station",
+  "department",
+  "lecturers_name",
+  "lecturers_contact",
   "documents_section",
   "school_letter",
   "insurance",
@@ -36,12 +48,7 @@
   "column_break_clsl",
   "copy_of_id",
   "cv",
-  "human_resource_letter",
-  "skills_and_interests_tab",
-  "skills_and_achievements_section",
-  "skills_at_start_of_internship",
-  "column_break_hbqa",
-  "interest"
+  "human_resource_letter"
  ],
  "fields": [
   {
@@ -62,13 +69,6 @@
    "fieldname": "residential_area",
    "fieldtype": "Data",
    "label": "Residential Area"
-  },
-  {
-   "default": "+254",
-   "fieldname": "phone_number",
-   "fieldtype": "Data",
-   "label": "Phone Number",
-   "placeholder": "(+254)"
   },
   {
    "fieldname": "school_and_internship_details_section",
@@ -142,39 +142,10 @@
    "label": "Human Resource Letter"
   },
   {
-   "fieldname": "skills_and_achievements_section",
-   "fieldtype": "Section Break",
-   "label": "Skills and Achievements"
-  },
-  {
-   "fieldname": "skills_at_start_of_internship",
-   "fieldtype": "Long Text",
-   "label": "Skills at start of Internship"
-  },
-  {
-   "fieldname": "interest",
-   "fieldtype": "Long Text",
-   "label": "Interest"
-  },
-  {
-   "fetch_if_empty": 1,
-   "fieldname": "universitiescolleges",
-   "fieldtype": "Link",
-   "label": "Universities/Colleges",
-   "options": "Universities"
-  },
-  {
    "fieldname": "full_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Full Name"
-  },
-  {
-   "fieldname": "course_",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Course",
-   "options": "Courses"
   },
   {
    "fieldname": "internship_duration_section",
@@ -213,15 +184,6 @@
    "placeholder": "+254"
   },
   {
-   "fieldname": "skills_and_interests_tab",
-   "fieldtype": "Tab Break",
-   "label": "Skills and Interests"
-  },
-  {
-   "fieldname": "column_break_hbqa",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "county",
    "fieldtype": "Data",
    "label": "County"
@@ -237,17 +199,99 @@
    "fieldtype": "Select",
    "label": "Work Station",
    "options": "\nHeadquarters\nIOMe 001\nIOMe 005\nMombasa\nKwale\nKilifi\nTana River\nLamu\nTaita-Taveta\nGarissa\nWajir\nMandera\nMarsabit\nIsiolo\nMeru\nTharaka-Nithi\nEmbu\nKitui\nMachakos\nMakueni\nNyandarua\nNyeri\nKirinyaga\nMurang\u2019a\nKiambu\nTurkana\nWest Pokot\nSamburu\nTrans Nzoia\nUasin Gishu\nElgeyo-Marakwet\nNandi\nBaringo\nLaikipia\nNakuru\nNarok\nKajiado\nKericho\nBomet\nKakamega\nVihiga\nBungoma\nBusia\nSiaya\nKisumu\nHoma Bay\nMigori\nKisii\nNyamira\nNairobi City"
+  },
+  {
+   "default": "+254",
+   "fieldname": "phone_number_1",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "placeholder": "(+254)"
+  },
+  {
+   "fieldname": "emergency_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Emergency Contact"
+  },
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Data",
+   "label": "Occupation"
+  },
+  {
+   "fieldname": "column_break_xjqq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_number_2",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "relationship_type",
+   "fieldtype": "Select",
+   "label": "Relationship type",
+   "options": "\nFather\nMother\nSibling\nSpouse"
+  },
+  {
+   "fieldname": "academic_level",
+   "fieldtype": "Select",
+   "label": "Academic Level",
+   "options": "\nUndergraduate\nPostgraduate\nGraduate"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Course",
+   "options": "Courses"
+  },
+  {
+   "description": "Enter your university/college name",
+   "fieldname": "institution_name",
+   "fieldtype": "Data",
+   "label": "Institution name",
+   "options": "Universities"
+  },
+  {
+   "fieldname": "nationality",
+   "fieldtype": "Select",
+   "label": "Nationality",
+   "options": "\nKenyan\nForeigner"
+  },
+  {
+   "fieldname": "skills_and_interests_section",
+   "fieldtype": "Section Break",
+   "label": "Skills and Interests"
+  },
+  {
+   "fieldname": "specify_your_skill_set",
+   "fieldtype": "Long Text",
+   "label": "Specify your skill set"
+  },
+  {
+   "fieldname": "column_break_veoq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "outline_your_interests",
+   "fieldtype": "Long Text",
+   "label": "Outline your Interests"
   }
  ],
  "grid_page_length": 50,
  "image_field": "profile_photo",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-25 14:35:31.639489",
- "modified_by": "ashlyneokumu@gmail.com",
+ "modified": "2026-04-12 12:56:02.054225",
+ "modified_by": "Administrator",
  "module": "Krcs Internship",
- "name": "Intern",
- "naming_rule": "Expression",
+ "name": "User Profile",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

@@ -1,9 +1,9 @@
-# Copyright (c) 2025, Ash_Ok and contributors
+# Copyright (c) 2026, Ash_Ok and contributors
 # For license information, please see license.txt
 
 # import frappe
 from frappe.model.document import Document
 
 
-class Intern(Document):
+class Placement(Document):
 	pass

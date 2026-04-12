@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class InternshipPosting(Document):
+class IVIAMSSettingsSingleton(Document):
 	pass

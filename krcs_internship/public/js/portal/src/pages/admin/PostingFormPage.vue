@@ -144,7 +144,7 @@ const departmentOptions = ref([])
 
 const LOCATIONS = ["Nairobi", "Mombasa", "Kisumu", "Eldoret", "Nakuru", "Remote"]
 
-// Department options from the Internship Posting Select field
+// Department options from the Programme Posting Select field
 const DEPT_SELECT_OPTIONS = [
   "PROGRAM", "HR", "AUDIT & RISK", "PROCUREMENT", "FINANCE",
   "GLOBAL FUND", "ICHA", "NSD", "IT", "PR",
