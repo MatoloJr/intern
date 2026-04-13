@@ -8,13 +8,24 @@
  "field_order": [
   "sd"
  ],
- "fields": [
-  {
-   "fieldname": "sd",
-   "fieldtype": "Data",
-   "label": "sd"
-  }
- ],
+"fields": [
+    {
+      "fieldname": "placement",
+      "fieldtype": "Link",
+      "label": "Placement",
+      "options": "Placement",
+      "in_list_view": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "participant_name",
+      "fieldtype": "Data",
+      "label": "Participant Name",
+      "fetch_from": "placement.participant",
+      "in_list_view": 1,
+      "read_only": 1
+    }
+  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,

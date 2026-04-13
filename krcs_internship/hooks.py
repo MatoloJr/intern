@@ -1,26 +1,45 @@
 app_name = "krcs_internship"
 app_title = "Krcs Internship"
 app_publisher = "Ash_Ok"
-app_description = "Internship"
+app_description = "Intern, Volunteer & Industrial Attachment Management System"
 app_email = "ashlyneokumu@gmail.com"
 app_license = "mit"
 
-# Build the Vue portal after every bench migrate
 after_migrate = ["krcs_internship.install.build_portal"]
 
-# Expose the /portal page through Frappe's web layer
 website_route_rules = [
-	{"from_route": "/portal/<path:p>", "to_route": "portal"},
-	{"from_route": "/portal", "to_route": "portal"},
+    {"from_route": "/portal/<path:p>", "to_route": "portal"},
+    {"from_route": "/portal", "to_route": "portal"},
 ]
 
-# Fixtures to export/import reference data with the app
 fixtures = [
-	{
-        "dt": "Role", 
-        "filters": [["name", "in", ["Internship Admin", "Intern"]]]},
+    {"dt": "Role", "filters": [["name", "in", [
+        "Internship Admin", "Intern",
+        "IVIAMS Participant", "IVIAMS Supervisor",
+        "IVIAMS Coordinator", "IVIAMS HR Officer",
+    ]]]},
 ]
 
+doc_events = {
+    "Intern Application": {
+        "on_update": "krcs_internship.letters.on_application_update",
+    },
+    "Stipend Payment Entry": {
+        "on_update": "krcs_internship.krcs_internship.doctype.stipend_payment_entry"
+                     ".stipend_payment_entry.StipendPaymentEntry.on_update",
+    },
+}
+
+scheduler_events = {
+    "daily": [
+        "krcs_internship.tasks.send_timesheet_reminders",
+        "krcs_internship.tasks.flag_missing_daily_logs",
+        "krcs_internship.tasks.send_evaluation_reminders",
+    ],
+    "weekly": [
+        "krcs_internship.tasks.compile_weekly_reports",
+    ],
+}
 # Apps
 # ------------------
 
